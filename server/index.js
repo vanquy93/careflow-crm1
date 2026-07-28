@@ -3,12 +3,13 @@ import cors from 'cors';
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -76,6 +77,13 @@ const deleteDocument = (collection, id) => {
   });
 };
 
+// Serve React frontend (production build) - BEFORE API routes
+const distPath = path.join(__dirname, '../dist');
+if (existsSync(distPath)) {
+  app.use(express.static(distPath));
+  console.log('Serving React frontend from dist/');
+}
+
 app.get('/:collection', async (req, res) => {
   try {
     const docs = await getDocuments(req.params.collection, req.query);
@@ -133,6 +141,13 @@ app.delete('/:collection/:id', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Backend server (Express + SQLite) đang chạy tại http://localhost:${port}`);
+// SPA fallback - must be LAST
+if (existsSync(distPath)) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Backend server (Express + SQLite) đang chạy tại http://0.0.0.0:${port}`);
 });
