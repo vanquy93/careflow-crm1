@@ -143,7 +143,7 @@ app.delete('/:collection/:id', async (req, res) => {
 
 // SPA fallback - must be LAST
 if (existsSync(distPath)) {
-  app.get('*', (req, res) => {
+  app.use((req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }
