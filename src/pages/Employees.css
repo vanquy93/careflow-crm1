@@ -1,0 +1,136 @@
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.agent-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.agent-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-color);
+}
+
+.agent-name {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.agent-title {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  background: rgba(0,0,0,0.05);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .agent-title {
+  background: rgba(255,255,255,0.1);
+}
+
+.agent-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
+  flex: 1;
+  background: rgba(0,0,0,0.02);
+  padding: 0.75rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+[data-theme='dark'] .stat-item {
+  background: rgba(255,255,255,0.02);
+}
+
+.stat-item span {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.stat-item strong {
+  font-size: 1rem;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.progress-bar-bg {
+  height: 8px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease-in-out;
+}
+
+.leaderboard-card {
+  margin-top: 2rem;
+}
+
+.leaderboard-card h3 {
+  margin-bottom: 1.5rem;
+}
+
+.rank-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.rank-1 { background-color: #fbbf24; color: #fff; }
+.rank-2 { background-color: #94a3b8; color: #fff; }
+.rank-3 { background-color: #b45309; color: #fff; }
+
+.mini-progress {
+  display: flex;
+  align-items: center;
+}
+
+.mini-progress-bar {
+  flex: 1;
+  height: 6px;
+  background-color: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background-color: var(--accent-color);
+}

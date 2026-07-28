@@ -1,0 +1,54 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+release
+out
+
+# Local env files
+*.local
+
+# Database (local data, should not be in source control)
+database.sqlite
+
+# Electron build artifacts
+*.exe
+*.dmg
+*.AppImage
+*.node
+
+# Batch scripts (local only)
+KhoiDong_CRM.bat
+START_CRM.bat
+
+# Duplicate/nested folder
+CRM/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/

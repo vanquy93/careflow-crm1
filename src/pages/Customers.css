@@ -1,0 +1,279 @@
+.deals-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.deals-subheader {
+  height: 56px;
+  background-color: var(--bg-white);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.deals-subheader-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-add-deal {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--base-blue);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-add-deal:hover {
+  background-color: var(--base-blue-hover);
+}
+
+.divider-vertical {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border-color);
+}
+
+.btn-text, .btn-icon, .btn-outline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-main);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.btn-text:hover, .btn-icon:hover {
+  background-color: var(--bg-body);
+}
+
+.btn-outline {
+  border-color: var(--border-color);
+}
+.btn-outline:hover {
+  background-color: var(--bg-body);
+}
+
+.total-summary {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.deals-subheader-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.view-mode {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+.view-mode:hover {
+  background-color: var(--bg-body);
+  border-color: var(--border-color);
+}
+
+.quick-filter {
+  position: relative;
+}
+
+.quick-filter input {
+  height: 32px;
+  width: 220px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0 32px 0 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.quick-filter input:focus {
+  border-color: var(--base-blue);
+}
+
+.filter-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+/* Board */
+.board-container {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px 8px;
+}
+
+.board-column {
+  min-width: 280px;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 8px;
+  background-color: transparent;
+}
+
+.column-header {
+  padding: 8px 0 16px;
+  border-bottom: 2px solid transparent; /* Can add color depending on stage */
+}
+
+.column-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.column-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.column-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+
+.column-content.dragging-over {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+/* Card */
+.deal-card {
+  background-color: var(--bg-white);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.deal-card:hover {
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  border-color: #b3bac5;
+}
+
+.deal-card.dragging {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  transform: rotate(2deg);
+}
+
+.card-tags {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.color-bar {
+  height: 4px;
+  width: 24px;
+  border-radius: 2px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.4;
+  flex: 1;
+  padding-right: 8px;
+}
+
+.btn-more {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 50%;
+  background-color: #f4f5f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-company {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.card-agent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-agent img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.card-agent span {
+  font-size: 12px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.card-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+}

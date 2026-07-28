@@ -1,0 +1,436 @@
+{
+  "users": [
+    {
+      "id": "admin",
+      "name": "Quản trị Hệ thống",
+      "email": "admin",
+      "password": "12345678@",
+      "role": "Admin",
+      "permissions": [
+        "view_all",
+        "view_reports",
+        "manage_users",
+        "delete_data"
+      ],
+      "avatar": "https://i.pravatar.cc/150?u=adminmaster",
+      "kpi": {
+        "target": 0,
+        "achieved": 0
+      },
+      "kpiTarget": 0
+    },
+    {
+      "id": "EMP001",
+      "name": "Bảo Minh",
+      "email": "minh.bao@quypro.com",
+      "password": "1",
+      "role": "Manager",
+      "permissions": [
+        "view_all",
+        "view_reports"
+      ],
+      "avatar": "https://i.pravatar.cc/150?u=admin",
+      "kpi": {
+        "target": 2000000000,
+        "achieved": 550000000
+      }
+    },
+    {
+      "id": "EMP002",
+      "name": "Trần Anh Tuấn",
+      "email": "tuan.tran@quypro.com",
+      "password": "1",
+      "role": "Sale",
+      "permissions": [],
+      "avatar": "https://i.pravatar.cc/150?u=sale1",
+      "kpi": {
+        "target": 3000000000,
+        "achieved": 150000000
+      },
+      "kpiTarget": 3000000000
+    },
+    {
+      "id": "0v2ghRg1YyA",
+      "name": "EMP003",
+      "email": "vanquy93mc@gmail.com",
+      "password": "123456",
+      "role": "Sale",
+      "permissions": [],
+      "avatar": "https://i.pravatar.cc/150?u=vanquy93mc@gmail.com",
+      "kpi": {
+        "target": 1000000000,
+        "achieved": 0
+      }
+    }
+  ],
+  "deals": [
+    {
+      "id": "DEAL001",
+      "title": "HĐ Phần mềm ERP",
+      "company": "Techcombank",
+      "value": 150000000,
+      "agentId": "EMP002",
+      "stageId": "stage-6",
+      "tags": [
+        "Ngân hàng",
+        "VIP"
+      ],
+      "createdAt": "2026-06-25T08:30:00.000Z"
+    },
+    {
+      "id": "DEAL002",
+      "title": "Setup Hệ thống CRM",
+      "company": "Công ty TNHH Techcombank",
+      "value": 85000000,
+      "agentId": "EMP001",
+      "stageId": "stage-6",
+      "tags": [
+        "Bán lẻ"
+      ],
+      "createdAt": "2026-06-28T14:15:00.000Z"
+    },
+    {
+      "id": "gp52SHKfqwk",
+      "title": "tiền số",
+      "company": "Công ty TNHH Techcombank",
+      "value": 100000000,
+      "stageId": "stage-1",
+      "agentId": "EMP_1782836856466",
+      "notes": "thay đổi",
+      "tags": [],
+      "createdAt": "2026-06-30T16:35:00.000Z"
+    },
+    {
+      "id": "ZotqKas9E94",
+      "title": "xzczvxvx",
+      "company": "Công ty TNHH Techcombank",
+      "value": 11414243434343,
+      "stageId": "stage-3",
+      "agentId": "0v2ghRg1YyA",
+      "notes": "",
+      "tags": [],
+      "createdAt": "2026-06-30T17:44:31.517Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": "CUST001",
+      "name": "Công ty TNHH Techcombank",
+      "contactPerson": "Nguyễn Quỳnh Chi",
+      "email": "chi.nguyen@techcombank.com.vn",
+      "phone": "0988777666",
+      "industry": "Ngân hàng",
+      "status": "Đang theo đuổi",
+      "tags": [
+        "VIP"
+      ],
+      "ownerId": "EMP_1782836856466",
+      "code": "1"
+    },
+    {
+      "code": "2",
+      "name": "Ngân hàng LPBANK",
+      "type": "Doanh nghiệp lớn",
+      "industry": "Tài chính",
+      "ownerId": "EMP_1782836856466",
+      "id": "cJ-jAHObHTc"
+    },
+    {
+      "id": "ZgaEjiL1u7E",
+      "code": "3",
+      "name": "Công ty TNHH MBbank",
+      "type": "Doanh nghiệp lớn",
+      "industry": "Ngân hàng",
+      "ownerId": "admin"
+    },
+    {
+      "id": "KUEUuzNc7xI",
+      "code": "4",
+      "name": "Ngân hàngVPBANK",
+      "type": "Doanh nghiệp lớn",
+      "industry": "Ngân hàng",
+      "ownerId": "admin"
+    }
+  ],
+  "contacts": [
+    {
+      "id": "CONT001",
+      "name": "Nguyễn Quỳnh Chi",
+      "email": "chi.nguyen@techcombank.com.vn",
+      "phone": "0988777666",
+      "company": "Techcombank",
+      "role": "Giám đốc IT",
+      "status": "Đang làm việc"
+    },
+    {
+      "name": "Phạm Văn Qúy",
+      "phone": "0984214746",
+      "email": "vanquy93mc@gmail.com",
+      "company": "Ngân hàng LPBANK",
+      "position": "",
+      "id": "e41GgD-FQgQ"
+    }
+  ],
+  "activities": [
+    {
+      "type": "Meeting",
+      "title": "gặp khách hàng",
+      "date": "2026-06-26",
+      "contact": "Phạm Văn Qúy",
+      "status": "Sắp tới",
+      "id": "ONVcYl-FtYY"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "vWxPkVTB_PE",
+      "message": "🎉 Chúc mừng! Thương vụ \"Setup Hệ thống CRM\" trị giá VND85.000.000 vừa được chuyển sang Chốt Hợp Đồng!",
+      "timestamp": "2026-06-30T15:50:28.539Z",
+      "isRead": true
+    },
+    {
+      "id": "XLzqU1mxelo",
+      "type": "DEAL",
+      "referenceId": "DEAL002",
+      "message": "🎉 Chúc mừng! Thương vụ \"Setup Hệ thống CRM\" trị giá VND85.000.000 vừa được chuyển sang Chốt Hợp Đồng!",
+      "timestamp": "2026-06-30T15:57:49.292Z",
+      "isRead": true
+    },
+    {
+      "id": "X9GXFRwcJnM",
+      "type": "DEAL",
+      "referenceId": "gp52SHKfqwk",
+      "message": "🎉 Chúc mừng! Thương vụ \"tiền số\" trị giá VND100.000.000 vừa được chuyển sang Chốt Hợp Đồng!",
+      "timestamp": "2026-06-30T16:49:05.079Z",
+      "isRead": true
+    },
+    {
+      "id": "fv7ywf3bbPw",
+      "type": "ALERT",
+      "message": "⚠️ Cảnh báo: Quản trị Hệ thống vừa thực hiện hành động xóa trên DEAL (Xóa tạm thương vụ: tiền số 1).",
+      "timestamp": "2026-06-30T17:27:07.620Z",
+      "isRead": true
+    },
+    {
+      "id": "Z-6hOQYvHV8",
+      "type": "DEAL",
+      "referenceId": "DEAL002",
+      "message": "🎉 Chúc mừng! Thương vụ \"Setup Hệ thống CRM\" trị giá VND85.000.000 vừa được chuyển sang Chốt Hợp Đồng!",
+      "timestamp": "2026-07-01T16:07:00.479Z",
+      "isRead": true
+    },
+    {
+      "id": "2hcEtf83bYs",
+      "type": "DEAL",
+      "referenceId": "DEAL001",
+      "message": "🎉 Chúc mừng! Thương vụ \"HĐ Phần mềm ERP\" trị giá VND150.000.000 vừa được chuyển sang Chốt Hợp Đồng!",
+      "timestamp": "2026-07-02T13:54:54.508Z",
+      "isRead": true
+    }
+  ],
+  "campaigns": [],
+  "emails": [
+    {
+      "id": "IAqQtLPTqOc",
+      "sender": "Hệ thống Bảo mật",
+      "subject": "[CẢNH BÁO BẢO MẬT] Hành động xóa dữ liệu bởi Quản trị Hệ thống",
+      "snippet": "Vào lúc 00:27:07 1/7/2026, tài khoản Quản trị Hệ thống (Admin) đã xóa dữ liệu thuộc về DEAL...",
+      "date": "00:27:07 1/7/2026",
+      "isNew": true,
+      "status": "received"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "rlda6BkNi4o",
+      "user": "EMP003",
+      "role": "Sale",
+      "action": "CREATE",
+      "entity": "CONTACT",
+      "entityId": "CONT_1782837140426",
+      "details": "Thêm liên hệ: Phạm Văn Qúy",
+      "timestamp": "2026-06-30T16:32:20.438Z"
+    },
+    {
+      "id": "qNz3tTzTJ80",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "DELETE",
+      "entity": "CONTACT",
+      "entityId": "Kr2TEuzStUE",
+      "details": "Xóa liên hệ: Mã KH",
+      "timestamp": "2026-06-30T17:12:13.031Z"
+    },
+    {
+      "id": "0CCU1kzrnio",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "DELETE",
+      "entity": "CONTACT",
+      "entityId": "OR9MlFPaYOA",
+      "details": "Xóa liên hệ: 3",
+      "timestamp": "2026-06-30T17:12:15.501Z"
+    },
+    {
+      "id": "JEbmXp64CYw",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "DELETE",
+      "entity": "CONTACT",
+      "entityId": "QujUyhWwgik",
+      "details": "Xóa liên hệ: 4",
+      "timestamp": "2026-06-30T17:12:18.735Z"
+    },
+    {
+      "id": "vKLkbfGs7Uo",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "DELETE",
+      "entity": "DEAL",
+      "entityId": "qGjNq53DFqY",
+      "details": "Xóa tạm thương vụ: tiền số 1",
+      "timestamp": "2026-06-30T17:27:07.620Z"
+    },
+    {
+      "id": "QVlKN4Bjrs4",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "DEAL002",
+      "details": "Di chuyển \"Setup Hệ thống CRM\" từ stage-6 sang stage-5",
+      "timestamp": "2026-06-30T17:38:07.854Z"
+    },
+    {
+      "id": "GuYY3JTBJms",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Di chuyển \"tiền số\" từ stage-2 sang stage-4",
+      "timestamp": "2026-06-30T17:40:21.063Z"
+    },
+    {
+      "id": "KllZVfYbbCs",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Cập nhật thông tin thương vụ: tiền số",
+      "timestamp": "2026-06-30T17:40:35.293Z"
+    },
+    {
+      "id": "kowxeDKKfjU",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Di chuyển \"tiền số\" từ stage-4 sang stage-5",
+      "timestamp": "2026-06-30T17:40:42.079Z"
+    },
+    {
+      "id": "6xWqKo9uBzc",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Cập nhật thông tin thương vụ: tiền số",
+      "timestamp": "2026-06-30T17:40:44.950Z"
+    },
+    {
+      "id": "AI0OeV7R9TA",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Cập nhật thông tin thương vụ: tiền số",
+      "timestamp": "2026-06-30T17:42:44.615Z"
+    },
+    {
+      "id": "GoBjV9ok2v8",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Di chuyển \"tiền số\" từ stage-5 sang stage-2",
+      "timestamp": "2026-06-30T17:42:57.658Z"
+    },
+    {
+      "id": "CbMcGDxhF10",
+      "user": "EMP003",
+      "role": "Sale",
+      "action": "CREATE",
+      "entity": "DEAL",
+      "entityId": "DEAL_1782841471517",
+      "details": "Tạo mới thương vụ: xzczvxvx",
+      "timestamp": "2026-06-30T17:44:43.384Z"
+    },
+    {
+      "id": "R7tDYNfOgT8",
+      "user": "EMP003",
+      "role": "Sale",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "ZotqKas9E94",
+      "details": "Di chuyển \"xzczvxvx\" từ stage-1 sang stage-2",
+      "timestamp": "2026-06-30T17:51:11.945Z"
+    },
+    {
+      "id": "ji11ANVAjDY",
+      "user": "EMP003",
+      "role": "Sale",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "ZotqKas9E94",
+      "details": "Di chuyển \"xzczvxvx\" từ stage-2 sang stage-3",
+      "timestamp": "2026-06-30T17:51:13.893Z"
+    },
+    {
+      "id": "r1E3dOALsWM",
+      "user": "EMP003",
+      "role": "Sale",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "ZotqKas9E94",
+      "details": "Cập nhật thông tin thương vụ: xzczvxvx",
+      "timestamp": "2026-06-30T17:51:19.061Z"
+    },
+    {
+      "id": "uRq_YrzLY3M",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "DEAL002",
+      "details": "Di chuyển \"Setup Hệ thống CRM\" từ stage-5 sang stage-6",
+      "timestamp": "2026-07-01T16:07:00.469Z"
+    },
+    {
+      "id": "AmZKbAAljuw",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "DEAL001",
+      "details": "Di chuyển \"HĐ Phần mềm ERP\" từ stage-4 sang stage-6",
+      "timestamp": "2026-07-02T13:54:54.498Z"
+    },
+    {
+      "id": "daTDQ3Eiczw",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Di chuyển \"tiền số\" từ stage-2 sang stage-1",
+      "timestamp": "2026-07-02T13:55:52.900Z"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
