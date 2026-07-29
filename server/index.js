@@ -153,9 +153,14 @@ app.post('/login', async (req, res) => {
 });
 
 const VALID_COLLECTIONS = ['activities', 'contacts', 'auditLogs', 'campaigns', 'emails', 'customers', 'deals', 'deal_stages', 'notifications', 'projects', 'users'];
-const colRegex = `:collection(${VALID_COLLECTIONS.join('|')})`;
+const checkCollection = (req, res, next) => {
+  if (VALID_COLLECTIONS.includes(req.params.collection)) {
+    return next();
+  }
+  next('route'); // Bỏ qua nếu không phải API, chuyển tiếp xuống React fallback
+};
 
-app.get(`/${colRegex}`, authenticateToken, async (req, res) => {
+app.get('/:collection', checkCollection, authenticateToken, async (req, res) => {
   try {
     const docs = await getDocuments(req.params.collection, req.query);
     res.json(docs);
@@ -164,7 +169,7 @@ app.get(`/${colRegex}`, authenticateToken, async (req, res) => {
   }
 });
 
-app.post(`/${colRegex}`, authenticateToken, async (req, res) => {
+app.post('/:collection', checkCollection, authenticateToken, async (req, res) => {
   try {
     const data = req.body;
     const id = data.id || `gen_${Date.now()}_${Math.floor(Math.random()*1000)}`;
@@ -182,7 +187,7 @@ app.post(`/${colRegex}`, authenticateToken, async (req, res) => {
   }
 });
 
-app.put(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
+app.put('/:collection/:id', checkCollection, authenticateToken, async (req, res) => {
   try {
     const data = req.body;
     data.id = req.params.id;
@@ -196,7 +201,7 @@ app.put(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
   }
 });
 
-app.patch(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
+app.patch('/:collection/:id', checkCollection, authenticateToken, async (req, res) => {
   try {
     db.get(`SELECT data FROM documents WHERE id = ? AND collection = ?`, [req.params.id, req.params.collection], async (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
@@ -215,7 +220,7 @@ app.patch(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
   }
 });
 
-app.delete(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
+app.delete('/:collection/:id', checkCollection, authenticateToken, async (req, res) => {
   try {
     await deleteDocument(req.params.collection, req.params.id);
     res.json({});
