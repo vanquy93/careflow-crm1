@@ -7,8 +7,8 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
-    const storedAuth = localStorage.getItem('currentUser');
-    return storedAuth ? JSON.parse(storedAuth) : null;
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
   });
   
   const [users, setUsers] = useState([]);
@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   // Fetch Users from Server
   useEffect(() => {
     const fetchUsers = async () => {
+      if (!currentUser) return; // Wait until logged in to fetch users list
       try {
         const response = await api.get('/users');
         setUsers(response.data);
@@ -24,17 +25,21 @@ export const AuthProvider = ({ children }) => {
       }
     };
     fetchUsers();
-  }, []);
+  }, [currentUser]);
 
-  const login = (email, password) => {
-    // Tìm user bằng email, sđt hoặc id và kiểm tra mật khẩu
-    const user = users.find(u => (u.email === email || u.id === email || u.phone === email) && u.password === password);
-    if (user) {
+  const login = async (email, password) => {
+    try {
+      const res = await api.post('/login', { email, password });
+      const { token, user } = res.data;
+      
       setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', token);
       return true;
+    } catch (err) {
+      console.error('Login failed:', err);
+      return false;
     }
-    return false;
   };
 
   const register = async (userData) => {
@@ -57,8 +62,10 @@ export const AuthProvider = ({ children }) => {
     try {
       await api.post('/users', newUser);
       setUsers([...users, newUser]);
-      setCurrentUser(newUser);
-      localStorage.setItem('currentUser', JSON.stringify(newUser));
+      const res = await api.post('/login', { email: userData.email, password: userData.password || '12345678' });
+      setCurrentUser(res.data.user);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      localStorage.setItem('token', res.data.token);
       return true;
     } catch (e) {
       console.error(e);
@@ -121,14 +128,15 @@ export const AuthProvider = ({ children }) => {
     setUsers(users.map(u => u.id === id ? updatedUser : u));
     if (currentUser?.id === id) {
       setCurrentUser(updatedUser);
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      localStorage.setItem('user', JSON.stringify(updatedUser));
     }
     return true;
   };
 
   const logout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (

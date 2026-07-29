@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { ChevronRight, Plus, Filter, Settings, Search, X, Trash2, Clock, Activity, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { stages } from '../data/mockData';
 import { api } from '../api';
 import { logAction } from '../utils/audit';
 import './Customers.css';
@@ -21,14 +20,16 @@ const DealsBoard = () => {
   // Relational data
   const [customersData, setCustomersData] = useState([]);
   const [filteredDeals, setFilteredDeals] = useState([]);
+  const [dealStages, setDealStages] = useState([]);
 
   // Fetch Data from Server
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [dealsRes, custRes] = await Promise.all([
+        const [dealsRes, custRes, stagesRes] = await Promise.all([
           api.get('/deals'),
-          api.get('/customers')
+          api.get('/customers'),
+          api.get('/deal_stages')
         ]);
         setDeals(dealsRes.data.filter(d => !d.isDeleted));
         let custData = custRes.data.filter(c => !c.isDeleted);
@@ -36,6 +37,7 @@ const DealsBoard = () => {
           custData = custData.filter(c => c.ownerId === currentUser.id);
         }
         setCustomersData(custData);
+        setDealStages(stagesRes.data.sort((a,b) => (a.order || 0) - (b.order || 0)));
         
         // Check if URL has a Deal ID to auto-open
         const dealIdToOpen = searchParams.get('id');
@@ -168,7 +170,7 @@ const DealsBoard = () => {
         title: '',
         company: customersData[0]?.name || '',
         value: 0,
-        stageId: 'stage-1',
+        stageId: dealStages[0]?.id || 'stage-1',
         agentId: currentUser.id,
         notes: '',
         tags: [],
@@ -249,7 +251,7 @@ const DealsBoard = () => {
       {/* Kanban Board */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="board-container">
-          {stages.map(stage => {
+          {dealStages.map(stage => {
             const stageDeals = filteredDeals.filter(d => d.stageId === stage.id);
             const stageTotalValue = stageDeals.reduce((acc, d) => acc + d.value, 0);
             
@@ -396,7 +398,7 @@ const DealsBoard = () => {
                     onChange={e => setSelectedDeal({...selectedDeal, stageId: e.target.value})}
                     className="form-control"
                   >
-                    {stages.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                    {dealStages.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
                   </select>
                 </div>
                 

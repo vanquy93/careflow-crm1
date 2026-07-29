@@ -36,7 +36,7 @@ const Contacts = () => {
   
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({ name: '', phone: '', email: '', company: '', position: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', company: '', position: '', customerType: 'Doanh nghiệp' });
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = React.useRef(null);
 
@@ -46,7 +46,7 @@ const Contacts = () => {
       setFormData(contact);
     } else {
       setEditingId(null);
-      setFormData({ name: '', phone: '', email: '', company: '', position: '', ownerId: currentUser.id });
+      setFormData({ name: '', phone: '', email: '', company: '', position: '', ownerId: currentUser.id, customerType: 'Doanh nghiệp' });
     }
     setShowModal(true);
   };
@@ -133,6 +133,7 @@ const Contacts = () => {
               email: row[2]?.trim() || '',
               company: row[3]?.trim() || '',
               position: row[4]?.trim() || '',
+              customerType: row[5]?.trim() || 'Doanh nghiệp',
               ownerId: currentUser.id
             };
             try {
@@ -186,6 +187,7 @@ const Contacts = () => {
           <thead>
             <tr>
               <th>Họ và Tên</th>
+              <th>Loại KH</th>
               <th>Số điện thoại</th>
               <th>Email</th>
               <th>Công ty</th>
@@ -197,6 +199,11 @@ const Contacts = () => {
             {filteredContacts.length > 0 ? filteredContacts.map(contact => (
               <tr key={contact.id}>
                 <td className="fw-600 color-blue">{contact.name}</td>
+                <td>
+                  <span className={`badge ${contact.customerType === 'Cá nhân' ? 'badge-info' : 'badge-success'}`}>
+                    {contact.customerType || 'Doanh nghiệp'}
+                  </span>
+                </td>
                 <td>{contact.phone}</td>
                 <td>{contact.email}</td>
                 <td>{contact.company}</td>
@@ -223,9 +230,18 @@ const Contacts = () => {
               <button className="btn-close" onClick={() => setShowModal(false)}><X size={20}/></button>
             </div>
             <form onSubmit={handleSave} className="modal-body">
-              <div className="form-group">
-                <label>Họ và Tên</label>
-                <input type="text" className="form-control" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Họ và Tên</label>
+                  <input type="text" className="form-control" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Loại Khách Hàng</label>
+                  <select className="form-control" value={formData.customerType} onChange={e => setFormData({...formData, customerType: e.target.value})}>
+                    <option value="Doanh nghiệp">Doanh nghiệp (B2B)</option>
+                    <option value="Cá nhân">Cá nhân (B2C)</option>
+                  </select>
+                </div>
               </div>
               <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>

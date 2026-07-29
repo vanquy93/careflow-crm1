@@ -19,6 +19,8 @@ const QUARTERS = ['Quý 1 (T1-T3)','Quý 2 (T4-T6)','Quý 3 (T7-T9)','Quý 4 (T1
 const Dashboard = () => {
   const { isManager, currentUser, users } = useAuth();
   const [deals, setDeals] = useState([]);
+  const [dealStages, setDealStages] = useState([]);
+  const wonStageId = dealStages.length > 0 ? dealStages[dealStages.length - 1].id : 'stage-6';
   
   // States for unified dashboard
   const [viewMode, setViewMode] = useState('month'); // month | quarter | year
@@ -36,7 +38,23 @@ const Dashboard = () => {
   const [isEditingTarget, setIsEditingTarget] = useState(false);
 
   useEffect(() => {
-    api.get('/deals').then(r => setDeals(r.data.filter(d => !d.isDeleted))).catch(console.error);
+    Promise.all([api.get('/deals'), api.get('/deal_stages')])
+      .then(([dealsRes, stagesRes]) => {
+        setDeals(dealsRes.data.filter(d => !d.isDeleted));
+        if (stagesRes.data.length > 0) {
+          setDealStages(stagesRes.data.sort((a,b) => (a.order||0) - (b.order||0)));
+        } else {
+          setDealStages([
+            { id: 'stage-1', title: 'Xác định', color: '#6554c0' },
+            { id: 'stage-2', title: 'Tiếp Cận', color: '#0052cc' },
+            { id: 'stage-3', title: 'Demo', color: '#ffab00' },
+            { id: 'stage-4', title: 'Báo Giá', color: '#ff5630' },
+            { id: 'stage-5', title: 'Đàm Phán', color: '#ff8b00' },
+            { id: 'stage-6', title: 'Chốt HĐ', color: '#36b37e' }
+          ]);
+        }
+      })
+      .catch(console.error);
   }, []);
 
   const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
@@ -57,33 +75,43 @@ const Dashboard = () => {
     if (!isManager) d = d.filter(d => d.agentId === currentUser.id);
     if (selectedAgent !== 'ALL') d = d.filter(d => d.agentId === selectedAgent);
     return d;
-  }, [deals, isManager, currentUser, selectedAgent]);
+  }, [deals, isManager, currentUser, selectedAgent, wonStageId]);
 
-  const monthlyData = useMemo(() => {
-    return MONTHS.map((_, i) => {
-      return closedDeals.filter(d => {
-        const date = new Date(d.createdAt || Date.now());
-        return date.getFullYear() === selectedYear && date.getMonth() === i;
-      }).reduce((s, d) => s + (Number(d.value) || 0), 0);
-    });
-  }, [closedDeals, selectedYear]);
+  const chartData = useMemo(() => {
+    let raw = {};
+    if (viewMode === 'month') {
+      MONTHS.forEach(m => raw[m] = 0);
+      closedDeals.forEach(d => {
+        let date = new Date(d.createdAt || Date.now());
+        if (date.getFullYear() === selectedYear) {
+          let m = MONTHS[date.getMonth()];
+          raw[m] += Number(d.value) || 0;
+        }
+      });
+    } else if (viewMode === 'quarter') {
+      QUARTERS.forEach(q => raw[q] = 0);
+      closedDeals.forEach(d => {
+        let date = new Date(d.createdAt || Date.now());
+        if (date.getFullYear() === selectedYear) {
+          let q = QUARTERS[Math.floor(date.getMonth() / 3)];
+          raw[q] += Number(d.value) || 0;
+        }
+      });
+    } else {
+      let years = [selectedYear - 2, selectedYear - 1, selectedYear, selectedYear + 1];
+      years.forEach(y => raw[`Năm ${y}`] = 0);
+      closedDeals.forEach(d => {
+        let yr = new Date(d.createdAt || Date.now()).getFullYear();
+        if (years.includes(yr)) {
+          raw[`Năm ${yr}`] += Number(d.value) || 0;
+        }
+      });
+    }
+    return raw;
+  }, [closedDeals, viewMode, selectedYear]);
 
-  const quarterlyData = useMemo(() => {
-    return [0,1,2,3].map(q => monthlyData.slice(q*3, q*3+3).reduce((s,v) => s+v, 0));
-  }, [monthlyData]);
-
-  const yearlyData = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    return [currentYear-3, currentYear-2, currentYear-1, currentYear].map(yr => {
-      let yrDeals = deals.filter(d => d.stageId === 'stage-6' && new Date(d.createdAt || 0).getFullYear() === yr);
-      if (!isManager) yrDeals = yrDeals.filter(d => d.agentId === currentUser.id);
-      if (selectedAgent !== 'ALL') yrDeals = yrDeals.filter(d => d.agentId === selectedAgent);
-      return yrDeals.reduce((s,d) => s+(Number(d.value)||0), 0);
-    });
-  }, [deals, isManager, currentUser, selectedAgent]);
-
-  const chartLabels = viewMode === 'month' ? MONTHS : viewMode === 'quarter' ? QUARTERS : [(new Date().getFullYear()-3)+'',(new Date().getFullYear()-2)+'',(new Date().getFullYear()-1)+'',new Date().getFullYear()+''];
-  const chartValues = viewMode === 'month' ? monthlyData : viewMode === 'quarter' ? quarterlyData : yearlyData;
+  const chartLabels = Object.keys(chartData);
+  const chartValues = Object.values(chartData);
   const chartTotalRevenue = chartValues.reduce((s,v) => s+v, 0);
   const bestPeriodIdx = chartValues.indexOf(Math.max(...chartValues));
 
@@ -130,15 +158,6 @@ const Dashboard = () => {
   };
 
   // 2. Data logic for KPI and Funnel (Filtered by Time)
-  const funnelStages = [
-    { id: 'stage-1', name: 'Xác định', color: '#6554c0' },
-    { id: 'stage-2', name: 'Tiếp Cận', color: '#0052cc' },
-    { id: 'stage-3', name: 'Demo', color: '#ffab00' },
-    { id: 'stage-4', name: 'Báo Giá', color: '#ff5630' },
-    { id: 'stage-5', name: 'Đàm Phán', color: '#ff8b00' },
-    { id: 'stage-6', name: 'Chốt HĐ', color: '#36b37e' }
-  ];
-
   const timeFilteredDeals = useMemo(() => {
     return deals.filter(d => {
       const date = new Date(d.createdAt || Date.now());
@@ -150,17 +169,17 @@ const Dashboard = () => {
   }, [deals, selectedYear, selectedMonth, selectedQuarter]);
 
   // Overall KPI total revenue (for the selected time period)
-  const totalRevenue = timeFilteredDeals.filter(d => d.stageId === 'stage-6').reduce((s, d) => s + (Number(d.value) || 0), 0);
+  const totalRevenue = timeFilteredDeals.filter(d => d.stageId === wonStageId).reduce((s, d) => s + (Number(d.value) || 0), 0);
 
   let salesUsers = [];
   if (isManager) {
     salesUsers = users.map(user => {
-      const userDeals = timeFilteredDeals.filter(d => d.agentId === user.id && d.stageId === 'stage-6');
+      const userDeals = timeFilteredDeals.filter(d => d.agentId === user.id && d.stageId === wonStageId);
       const currentRevenue = userDeals.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
       return {
         ...user,
         kpi: { target: user.kpi?.target || 0, current: currentRevenue },
-        dealsCount: timeFilteredDeals.filter(d => d.agentId === user.id && d.stageId === 'stage-6').length
+        dealsCount: timeFilteredDeals.filter(d => d.agentId === user.id && d.stageId === wonStageId).length
       };
     }).filter(u => u.role === 'Sale' || u.kpi.current > 0);
   }
@@ -196,7 +215,7 @@ const Dashboard = () => {
   };
 
   const filteredFunnelDeals = selectedAgent === 'ALL' ? timeFilteredDeals : timeFilteredDeals.filter(d => d.agentId === selectedAgent);
-  const maxDeals = Math.max(...funnelStages.map(s => filteredFunnelDeals.filter(d => d.stageId === s.id).length), 1);
+  const maxDeals = Math.max(...dealStages.map(s => filteredFunnelDeals.filter(d => d.stageId === s.id).length), 1);
   
   // Only calculate percentage against target for year (if Month/Quarter is ALL) 
   // or proportionately if we want to get fancy, but let's just use the strict target
@@ -359,14 +378,14 @@ const Dashboard = () => {
           <div style={{ background: 'var(--bg-white)', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <h3 style={{ margin: '0 0 20px', color: 'var(--text-main)' }}>Phễu Bán Hàng</h3>
             <div className="funnel-container">
-              {funnelStages.map((stage) => {
+              {dealStages.map((stage) => {
                 const count = filteredFunnelDeals.filter(d => d.stageId === stage.id).length;
-                const widthPct = Math.max((count / maxDeals) * 100, 5);
+                const widthPct = (count / maxDeals) * 100;
                 return (
-                  <div key={stage.id} className="funnel-row" title={`Giai đoạn: ${stage.name} - ${count} thương vụ`}>
-                    <div className="funnel-label">{stage.name}</div>
+                  <div key={stage.id} className="funnel-row" title={`Giai đoạn: ${stage.title} - ${count} thương vụ`}>
+                    <div className="funnel-label">{stage.title}</div>
                     <div className="funnel-bar-wrapper">
-                      <div className="funnel-bar" style={{ backgroundColor: stage.color, width: `${widthPct}%` }}></div>
+                      <div className="funnel-bar" style={{ backgroundColor: stage.color || '#0052cc', width: `${widthPct}%` }}></div>
                     </div>
                     <div className="funnel-count">{count}</div>
                   </div>

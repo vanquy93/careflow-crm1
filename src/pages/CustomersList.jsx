@@ -194,7 +194,11 @@ const CustomersList = () => {
                 <tr key={c.id}>
                   <td>{c.code}</td>
                   <td className="fw-600 color-blue">{c.name}</td>
-                  <td><span className="badge">{c.type}</span></td>
+                  <td>
+                    <span className={`badge ${c.type === 'Khách hàng cá nhân' ? 'badge-info' : ''}`}>
+                      {c.type}
+                    </span>
+                  </td>
                   <td>{c.industry}</td>
                   <td>{ownerName}</td>
                   <td className="text-right" style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
@@ -224,7 +228,7 @@ const CustomersList = () => {
                   <input type="text" className="form-control" required value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} />
                 </div>
                 <div className="form-group" style={{ flex: 2 }}>
-                  <label>Tên Công ty / Doanh nghiệp</label>
+                  <label>Tên Khách hàng / Công ty</label>
                   <input type="text" className="form-control" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                 </div>
               </div>
@@ -232,6 +236,7 @@ const CustomersList = () => {
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>Phân loại</label>
                   <select className="form-control" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                    <option value="Khách hàng cá nhân">Khách hàng cá nhân (B2C)</option>
                     <option value="Doanh nghiệp lớn">Doanh nghiệp lớn</option>
                     <option value="Doanh nghiệp vừa và nhỏ">Doanh nghiệp vừa và nhỏ</option>
                     <option value="Tập đoàn">Tập đoàn</option>

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit, Trash2, X, KeyRound } from 'lucide-react';
+import { Plus, Edit, Trash2, X, KeyRound, MoveUp, MoveDown } from 'lucide-react';
+import { api } from '../api';
 import './ListPage.css';
 import './Modal.css';
 
@@ -26,6 +27,106 @@ const Settings = () => {
   });
   const [smsStatus, setSmsStatus] = useState(null);
   const [smsTestPhone, setSmsTestPhone] = useState('');
+
+  // Tùy biến Giai đoạn
+  const [dealStages, setDealStages] = useState([]);
+  const [newStageTitle, setNewStageTitle] = useState('');
+
+  useEffect(() => {
+    const fetchStages = async () => {
+      try {
+        const res = await api.get('/deal_stages');
+        if (res.data.length === 0) {
+          const initialStages = [
+            { id: "stage-1", title: "Xác Định Khách Hàng", order: 1 },
+            { id: "stage-2", title: "Tiếp Cận Khách Hàng", order: 2 },
+            { id: "stage-3", title: "Demo Sản Phẩm", order: 3 },
+            { id: "stage-4", title: "Gửi Báo Giá", order: 4 },
+            { id: "stage-5", title: "Đàm Phán Giá", order: 5 },
+            { id: "stage-6", title: "Chốt Hợp Đồng", order: 6 }
+          ];
+          for (let s of initialStages) {
+             await api.post('/deal_stages', s);
+          }
+          setDealStages(initialStages);
+        } else {
+          setDealStages(res.data.sort((a,b) => (a.order || 0) - (b.order || 0)));
+        }
+      } catch (err) { console.error(err); }
+    };
+    fetchStages();
+  }, []);
+
+  const handleAddStage = async () => {
+    if (!newStageTitle.trim()) return;
+    const newStage = {
+      id: `stage-${Date.now()}`,
+      title: newStageTitle,
+      order: dealStages.length + 1
+    };
+    try {
+      await api.post('/deal_stages', newStage);
+      setDealStages([...dealStages, newStage]);
+      setNewStageTitle('');
+    } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteStage = async (id) => {
+    if (dealStages.length <= 1) {
+      alert("Phải có ít nhất 1 giai đoạn thương vụ!");
+      return;
+    }
+    const targetStage = dealStages.find(s => s.id === id);
+    if (!window.confirm(`Bạn có chắc muốn xóa giai đoạn "${targetStage?.title}"?`)) return;
+    
+    // Check if deals are using this stage
+    try {
+      const dealsRes = await api.get('/deals');
+      const dealsInStage = dealsRes.data.filter(d => d.stageId === id && !d.isDeleted);
+      if (dealsInStage.length > 0) {
+        const fallbackStage = dealStages.find(s => s.id !== id);
+        if (!window.confirm(`Có ${dealsInStage.length} thương vụ đang ở giai đoạn này. Chúng sẽ tự động chuyển về giai đoạn "${fallbackStage.title}". Bạn đồng ý chứ?`)) {
+          return;
+        }
+        // Move deals
+        for (let d of dealsInStage) {
+          await api.patch(`/deals/${d.id}`, { stageId: fallbackStage.id });
+        }
+      }
+      
+      await api.delete(`/deal_stages/${id}`);
+      setDealStages(dealStages.filter(s => s.id !== id));
+      alert("Đã xóa giai đoạn thành công!");
+    } catch (e) { console.error(e); }
+  };
+
+  const handleMoveStage = async (index, direction) => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === dealStages.length - 1) return;
+
+    const newStages = [...dealStages];
+    const swapIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    // Swap their 'order' values
+    const tempOrder = newStages[index].order;
+    newStages[index].order = newStages[swapIndex].order;
+    newStages[swapIndex].order = tempOrder;
+    
+    // Sort by order again
+    const sorted = [...newStages].sort((a, b) => (a.order || 0) - (b.order || 0));
+    setDealStages(sorted);
+    
+    // Save to server
+    try {
+      await Promise.all([
+        api.put(`/deal_stages/${newStages[index].id}`, newStages[index]),
+        api.put(`/deal_stages/${newStages[swapIndex].id}`, newStages[swapIndex])
+      ]);
+    } catch(e) {
+      console.error(e);
+      alert('Lỗi khi lưu thứ tự giai đoạn!');
+    }
+  };
 
   const handleColorChange = (e) => {
     const color = e.target.value;
@@ -70,7 +171,6 @@ const Settings = () => {
     if (!smsConfig.apiKey) { alert('Vui lòng nhập API Key trước!'); return; }
     setSmsStatus('loading');
     try {
-      // Test call to ESMS API
       const res = await fetch('https://rest.esms.vn/MainService.svc/json/GetBalance_V4_post_json/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -154,7 +254,7 @@ const Settings = () => {
   return (
     <div className="list-page">
       <div className="list-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: 0 }}>
-        <div style={{ display: 'flex', gap: 24 }}>
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
           <div 
             onClick={() => setActiveTab('users')}
             style={{ padding: '12px 4px', cursor: 'pointer', borderBottom: activeTab === 'users' ? '3px solid var(--base-blue)' : '3px solid transparent', fontWeight: activeTab === 'users' ? 600 : 400 }}
@@ -166,6 +266,12 @@ const Settings = () => {
             style={{ padding: '12px 4px', cursor: 'pointer', borderBottom: activeTab === 'system' ? '3px solid var(--base-blue)' : '3px solid transparent', fontWeight: activeTab === 'system' ? 600 : 400 }}
           >
             Cài đặt Giao diện
+          </div>
+          <div 
+            onClick={() => setActiveTab('deal_stages')}
+            style={{ padding: '12px 4px', cursor: 'pointer', borderBottom: activeTab === 'deal_stages' ? '3px solid var(--base-blue)' : '3px solid transparent', fontWeight: activeTab === 'deal_stages' ? 600 : 400 }}
+          >
+            Tùy biến Thương vụ
           </div>
           <div 
             onClick={() => setActiveTab('integrations')}
@@ -217,6 +323,45 @@ const Settings = () => {
           </tbody>
         </table>
       </div>
+      ) : activeTab === 'deal_stages' ? (
+        <div style={{ padding: '24px' }}>
+          <div className="base-card" style={{ padding: '24px', maxWidth: '600px' }}>
+            <h3 style={{ marginBottom: '16px' }}>Cấu trúc Phễu Bán hàng (Deal Stages)</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 20 }}>
+              Quản lý các cột giai đoạn trong mục Thương vụ. Bạn có thể chèn thêm bước hoặc xóa bớt. 
+              Các thương vụ nằm ở giai đoạn bị xóa sẽ tự động bị đẩy về giai đoạn mặc định.
+            </p>
+            
+            <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Nhập tên giai đoạn mới..." 
+                value={newStageTitle}
+                onChange={e => setNewStageTitle(e.target.value)}
+              />
+              <button className="btn-primary" onClick={handleAddStage} style={{ whiteSpace: 'nowrap' }}><Plus size={16}/> Thêm cột</button>
+            </div>
+
+            <div style={{ background: '#f8fafc', borderRadius: 8, border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+              {dealStages.map((stage, idx) => (
+                <div key={stage.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: idx !== dealStages.length - 1 ? '1px solid var(--border-color)' : 'none', background: '#fff' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--base-blue)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600 }}>
+                      {idx + 1}
+                    </div>
+                    <span style={{ fontWeight: 500, color: 'var(--text-main)' }}>{stage.title}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button className="btn-icon text-muted" onClick={() => handleMoveStage(idx, 'up')} disabled={idx === 0} title="Di chuyển lên"><MoveUp size={16}/></button>
+                    <button className="btn-icon text-muted" onClick={() => handleMoveStage(idx, 'down')} disabled={idx === dealStages.length - 1} title="Di chuyển xuống"><MoveDown size={16}/></button>
+                    <button className="btn-icon text-danger" onClick={() => handleDeleteStage(stage.id)} title="Xóa giai đoạn" style={{ marginLeft: 8 }}><Trash2 size={16}/></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       ) : activeTab === 'system' ? (
         <div style={{ padding: '24px' }}>
           <div className="base-card" style={{ padding: '24px', maxWidth: '500px' }}>

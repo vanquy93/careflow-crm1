@@ -15,14 +15,14 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setTimeout(() => {
-      if (login(email, password)) {
-        navigate('/deals');
-      } else {
-        setError('Tài khoản hoặc mật khẩu không chính xác!');
-      }
-      setLoading(false);
-    }, 600);
+    
+    const success = await login(email, password);
+    if (success) {
+      navigate('/deals');
+    } else {
+      setError('Tài khoản hoặc mật khẩu không chính xác!');
+    }
+    setLoading(false);
   };
 
   return (
