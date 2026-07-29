@@ -1,46 +1,79 @@
-/* Tùy chỉnh CSS cho phễu bán hàng */
+/* Tùy chỉnh CSS cho phễu bán hàng (Kim tự tháp ngược) */
 .funnel-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
-  gap: 12px;
+  gap: 8px;
+  padding: 20px 0;
 }
 
 .funnel-row {
   display: flex;
   align-items: center;
   width: 100%;
+  position: relative;
+  justify-content: center;
 }
 
-.funnel-label {
-  width: 90px;
+.funnel-bar-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.funnel-bar {
+  height: 44px;
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.funnel-bar::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 100%);
+  border-radius: inherit;
+}
+
+.funnel-label-left {
+  position: absolute;
+  left: 0;
+  width: 140px;
   text-align: right;
   padding-right: 15px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #172b4d;
   white-space: nowrap;
 }
 
-.funnel-bar-wrapper {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.funnel-bar {
-  height: 32px;
-  border-radius: 4px;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.funnel-count {
-  width: 50px;
+.funnel-count-right {
+  position: absolute;
+  right: 0;
+  width: 100px;
   text-align: left;
   padding-left: 15px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #172b4d;
+  display: flex;
+  flex-direction: column;
+}
+
+.funnel-conversion {
+  font-size: 11px;
+  color: #8792a2;
+  font-weight: 500;
 }

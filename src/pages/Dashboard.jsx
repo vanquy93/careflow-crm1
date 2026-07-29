@@ -181,10 +181,23 @@ const Dashboard = () => {
     salesUsers = users.map(user => {
       const userDeals = timeFilteredDeals.filter(d => d.agentId === user.id && d.stageId === wonStageId);
       const currentRevenue = userDeals.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
+      
+      const projectsBreakdown = projects.map(p => {
+        const pDeals = userDeals.filter(d => d.projectId === p.id);
+        const pRev = pDeals.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
+        return { project: p, dealsCount: pDeals.length, revenue: pRev };
+      }).filter(pb => pb.revenue > 0 || pb.dealsCount > 0);
+      
+      const noProjDeals = userDeals.filter(d => !d.projectId);
+      if (noProjDeals.length > 0) {
+        projectsBreakdown.push({ project: { id: 'none', name: 'Không thuộc dự án' }, dealsCount: noProjDeals.length, revenue: noProjDeals.reduce((s,d)=>s+(Number(d.value)||0),0) });
+      }
+
       return {
         ...user,
         kpi: { target: user.kpi?.target || 0, current: currentRevenue },
-        dealsCount: timeFilteredDeals.filter(d => d.agentId === user.id && d.stageId === wonStageId).length
+        dealsCount: userDeals.length,
+        projectsBreakdown
       };
     }).filter(u => u.role === 'Sale' || u.kpi.current > 0);
   }
@@ -222,6 +235,12 @@ const Dashboard = () => {
   const filteredFunnelDeals = selectedAgent === 'ALL' ? timeFilteredDeals : timeFilteredDeals.filter(d => d.agentId === selectedAgent);
   const maxDeals = Math.max(...dealStages.map(s => filteredFunnelDeals.filter(d => d.stageId === s.id).length), 1);
   
+  // Advanced Metrics
+  const wonDealsCount = filteredFunnelDeals.filter(d => d.stageId === wonStageId).length;
+  const totalDealsCount = filteredFunnelDeals.length;
+  const winRate = totalDealsCount > 0 ? ((wonDealsCount / totalDealsCount) * 100).toFixed(1) : 0;
+  const avgDealSize = wonDealsCount > 0 ? (totalRevenue / wonDealsCount) : 0;
+
   // Only calculate percentage against target for year (if Month/Quarter is ALL) 
   // or proportionately if we want to get fancy, but let's just use the strict target
   const totalPercentage = companyTarget > 0 ? ((totalRevenue / companyTarget) * 100).toFixed(1) : 0;
@@ -240,6 +259,9 @@ const Dashboard = () => {
     const csvContent = 
       "--- BÁO CÁO NHÂN SỰ & KPI ---\n" + 
       [headers.join(','), ...rows.map(e => e.join(','))].join('\n') +
+      "\n\n--- CHI TIẾT THEO DỰ ÁN ---\n" +
+      ["Tên Nhân Viên", "Dự Án", "Hợp Đồng", "Doanh Thu"].join(',') + "\n" +
+      salesUsers.flatMap(emp => emp.projectsBreakdown.map(p => [emp.name, p.project.name, p.dealsCount, p.revenue].join(','))).join('\n') +
       "\n\n--- BÁO CÁO DOANH THU THEO KỲ ---\n" +
       [revHeaders.join(','), ...revRows.map(e => e.join(','))].join('\n');
       
@@ -335,14 +357,6 @@ const Dashboard = () => {
 
           <div className="sum-card" style={{ padding: '20px', background: 'var(--bg-white)', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <div style={{ width: 40, height: 40, background: 'rgba(0,178,167,0.1)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00b2a7' }}><BarChart2 size={20}/></div>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>Kỳ Tốt Nhất</p>
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--text-main)' }}>{chartLabels[bestPeriodIdx] || '-'}</h3>
-          </div>
-
-          <div className="sum-card" style={{ padding: '20px', background: 'var(--bg-white)', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
               <div style={{ width: 40, height: 40, background: 'rgba(255,171,0,0.1)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffab00' }}><Target size={20}/></div>
               <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>Mục Tiêu Công Ty</p>
             </div>
@@ -354,19 +368,30 @@ const Dashboard = () => {
                 {formatCurrency(companyTarget)}
               </h3>
             )}
+            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ flex: 1, height: 6, background: 'var(--border-color)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: '#ffab00', width: `${Math.min(totalPercentage, 100)}%` }}></div>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{totalPercentage}%</span>
+            </div>
+          </div>
+
+          <div className="sum-card" style={{ padding: '20px', background: 'var(--bg-white)', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <div style={{ width: 40, height: 40, background: 'rgba(0,178,167,0.1)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00b2a7' }}><BarChart2 size={20}/></div>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>Tỷ Lệ Chốt (Win Rate)</p>
+            </div>
+            <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--text-main)' }}>{winRate}%</h3>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{wonDealsCount} / {totalDealsCount} Thương vụ</div>
           </div>
 
           <div className="sum-card" style={{ padding: '20px', background: 'var(--bg-white)', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
               <div style={{ width: 40, height: 40, background: 'rgba(101,84,192,0.1)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6554c0' }}><Users size={20}/></div>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>Tỷ Lệ Đạt KPI</p>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>Giá Trị TB / Thương Vụ</p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--text-main)' }}>{totalPercentage}%</h3>
-              <div style={{ flex: 1, height: 8, background: 'var(--border-color)', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{ height: '100%', background: '#6554c0', width: `${Math.min(totalPercentage, 100)}%` }}></div>
-              </div>
-            </div>
+            <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--text-main)' }}>{formatCurrency(avgDealSize)}</h3>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Chỉ tính thương vụ đã chốt</div>
           </div>
         </div>
 
@@ -386,24 +411,40 @@ const Dashboard = () => {
         <div style={{ display: 'grid', gridTemplateColumns: isManager ? '1fr 2fr' : '1fr', gap: 20, marginBottom: 24 }}>
           {/* Funnel */}
           <div style={{ background: 'var(--bg-white)', borderRadius: 12, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-            <h3 style={{ margin: '0 0 20px', color: 'var(--text-main)' }}>Phễu Bán Hàng</h3>
+            <h3 style={{ margin: '0 0 20px', color: 'var(--text-main)', textAlign: 'center' }}>Phễu Bán Hàng (Kim Tự Tháp)</h3>
             <div className="funnel-container">
-              {dealStages.map((stage) => {
+              {dealStages.map((stage, idx) => {
                 const count = filteredFunnelDeals.filter(d => d.stageId === stage.id).length;
-                const widthPct = (count / maxDeals) * 100;
+                // Minimum width 20% to keep it visible, max 100%
+                let widthPct = maxDeals > 0 ? (count / maxDeals) * 100 : 0;
+                if (widthPct < 20 && count > 0) widthPct = 20;
+                if (count === 0) widthPct = 10;
+                
+                // Calculate conversion rate from previous stage
+                let prevCount = 0;
+                if (idx > 0) {
+                  prevCount = filteredFunnelDeals.filter(d => d.stageId === dealStages[idx-1].id).length;
+                }
+                const conversion = prevCount > 0 ? ((count / prevCount) * 100).toFixed(0) : (idx === 0 ? 100 : 0);
+
                 return (
                   <div key={stage.id} className="funnel-row" title={`Giai đoạn: ${stage.title} - ${count} thương vụ`}>
-                    <div className="funnel-label">{stage.title}</div>
+                    <div className="funnel-label-left">{stage.title}</div>
                     <div className="funnel-bar-wrapper">
-                      <div className="funnel-bar" style={{ backgroundColor: stage.color || '#0052cc', width: `${widthPct}%` }}></div>
+                      <div className="funnel-bar" style={{ backgroundColor: stage.color || '#0052cc', width: `${widthPct}%` }}>
+                        {count > 0 ? count : ''}
+                      </div>
                     </div>
-                    <div className="funnel-count">{count}</div>
+                    <div className="funnel-count-right">
+                      <span>{count} TV</span>
+                      {idx > 0 && <span className="funnel-conversion">↳ {conversion}%</span>}
+                    </div>
                   </div>
                 );
               })}
             </div>
             <div style={{ textAlign: 'center', marginTop: '20px', color: 'var(--text-muted)', fontSize: '13px' }}>
-              Hiển thị số lượng Thương vụ theo giai đoạn
+              Hiển thị số lượng Thương vụ và tỷ lệ chuyển đổi
             </div>
           </div>
 
@@ -443,30 +484,44 @@ const Dashboard = () => {
                     {filteredAndSortedKpiData.map((emp, i) => {
                       const progress = emp.kpi.target > 0 ? Math.min((emp.kpi.current / emp.kpi.target) * 100, 100) : 0;
                       return (
-                        <tr key={emp.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                            {i === 0 && <span style={{ fontSize: 16 }}>🥇</span>}
-                            {i === 1 && <span style={{ fontSize: 16 }}>🥈</span>}
-                            {i === 2 && <span style={{ fontSize: 16 }}>🥉</span>}
-                            {i > 2 && <span style={{ width: 16 }}></span>}
-                            <img src={emp.avatar} alt={emp.name} style={{ width: 32, height: 32, borderRadius: '50%' }} />
-                            <div>
-                              <strong style={{ color: 'var(--text-main)', fontSize: 14 }}>{emp.name}</strong>
-                              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{emp.role}</div>
-                            </div>
-                          </td>
-                          <td style={{ padding: '12px', fontWeight: 600, color: 'var(--text-main)' }}>{emp.dealsCount}</td>
-                          <td style={{ padding: '12px' }}>{formatShort(emp.kpi.target)}</td>
-                          <td style={{ padding: '12px', color: '#36b37e', fontWeight: 700 }}>{formatCurrency(emp.kpi.current)}</td>
-                          <td style={{ padding: '12px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <div style={{ flex: 1, height: 6, background: 'var(--border-color)', borderRadius: 3, overflow: 'hidden' }}>
-                                <div style={{ height: '100%', background: progress >= 100 ? '#36b37e' : '#0052cc', width: `${progress}%` }}></div>
+                        <React.Fragment key={emp.id}>
+                          <tr style={{ background: 'var(--bg-body)' }}>
+                            <td style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                              {i === 0 && <span style={{ fontSize: 16 }}>🥇</span>}
+                              {i === 1 && <span style={{ fontSize: 16 }}>🥈</span>}
+                              {i === 2 && <span style={{ fontSize: 16 }}>🥉</span>}
+                              {i > 2 && <span style={{ width: 16 }}></span>}
+                              <img src={emp.avatar} alt={emp.name} style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                              <div>
+                                <strong style={{ color: 'var(--text-main)', fontSize: 14 }}>{emp.name}</strong>
+                                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{emp.role}</div>
                               </div>
-                              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-main)', width: 40 }}>{progress.toFixed(1)}%</span>
-                            </div>
-                          </td>
-                        </tr>
+                            </td>
+                            <td style={{ padding: '12px', fontWeight: 600, color: 'var(--text-main)' }}>{emp.dealsCount}</td>
+                            <td style={{ padding: '12px' }}>{formatShort(emp.kpi.target)}</td>
+                            <td style={{ padding: '12px', color: '#36b37e', fontWeight: 700 }}>{formatCurrency(emp.kpi.current)}</td>
+                            <td style={{ padding: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ flex: 1, height: 6, background: 'var(--border-color)', borderRadius: 3, overflow: 'hidden' }}>
+                                  <div style={{ height: '100%', background: progress >= 100 ? '#36b37e' : 'linear-gradient(90deg, #ffab00, #36b37e)', width: `${progress}%` }}></div>
+                                </div>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-main)', width: 40 }}>{progress.toFixed(1)}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                          {/* Project Breakdown Rows */}
+                          {emp.projectsBreakdown?.map((pb, pIdx) => (
+                            <tr key={`${emp.id}-${pb.project.id}-${pIdx}`} style={{ borderBottom: pIdx === emp.projectsBreakdown.length - 1 ? '1px solid var(--border-color)' : 'none', background: '#fff' }}>
+                              <td style={{ padding: '8px 12px 8px 60px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                                ↳ Dự án: <strong>{pb.project.name}</strong>
+                              </td>
+                              <td style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: '13px' }}>{pb.dealsCount} HĐ</td>
+                              <td colSpan="3" style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                                Đóng góp: <strong style={{color: '#6554c0'}}>{formatCurrency(pb.revenue)}</strong>
+                              </td>
+                            </tr>
+                          ))}
+                        </React.Fragment>
                       );
                     })}
                     {filteredAndSortedKpiData.length === 0 && (
