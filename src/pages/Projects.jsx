@@ -83,21 +83,16 @@ const Projects = () => {
   };
 
   const getProjectCustomers = (project) =>
-    customers.filter(c => project.memberIds?.includes(c.ownerId));
+    customers.filter(c => c.projectId === project.id);
 
   const getProjectDeals = (project) => {
-    const prjCustomerNames = getProjectCustomers(project).map(c => c.name);
-    return deals.filter(d =>
-      project.memberIds?.includes(d.agentId) ||
-      prjCustomerNames.includes(d.company)
-    );
+    return deals.filter(d => d.projectId === project.id);
   };
 
   const getProjectActivities = (project) =>
-    activities.filter(a => project.memberIds?.some(mid => {
-      const m = users.find(u => u.id === mid);
-      return m && (a.user === m.name || a.contact === m.name);
-    }));
+    activities.filter(a => a.projectId === project.id);
+
+
 
   const STAGE_LABELS = {
     'stage-1': 'Xác Định KH', 'stage-2': 'Tiếp Cận', 'stage-3': 'Demo SP',

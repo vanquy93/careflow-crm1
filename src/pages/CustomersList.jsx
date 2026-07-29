@@ -10,10 +10,11 @@ import './Modal.css';
 const CustomersList = () => {
   const { users, currentUser } = useAuth();
   const [customers, setCustomers] = useState([]);
+  const [projects, setProjects] = useState([]);
   
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({ code: '', name: '', type: 'Doanh nghiệp vừa và nhỏ', industry: '', ownerId: users[0]?.id || '' });
+  const [formData, setFormData] = useState({ code: '', name: '', type: 'Doanh nghiệp vừa và nhỏ', industry: '', ownerId: users[0]?.id || '', projectId: '' });
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = React.useRef(null);
 
@@ -26,6 +27,8 @@ const CustomersList = () => {
           data = data.filter(c => c.ownerId === currentUser.id);
         }
         setCustomers(data);
+        const prjResponse = await api.get('/projects');
+        setProjects(prjResponse.data || []);
       } catch (err) {
         console.error(err);
       }
@@ -39,7 +42,7 @@ const CustomersList = () => {
       setFormData(customer);
     } else {
       setEditingId(null);
-      setFormData({ code: '', name: '', type: 'Doanh nghiệp vừa và nhỏ', industry: '', ownerId: currentUser.role === 'Sale' ? currentUser.id : (users[0]?.id || '') });
+      setFormData({ code: '', name: '', type: 'Doanh nghiệp vừa và nhỏ', industry: '', ownerId: currentUser.role === 'Sale' ? currentUser.id : (users[0]?.id || ''), projectId: '' });
     }
     setShowModal(true);
   };
@@ -51,14 +54,25 @@ const CustomersList = () => {
         await api.put(`/customers/${editingId}`, formData);
         setCustomers(customers.map(c => c.id === editingId ? { ...formData, id: editingId } : c));
         await logAction(currentUser, 'UPDATE', 'CUSTOMER', editingId, `Cập nhật khách hàng: ${formData.name}`);
+        window.dispatchEvent(new CustomEvent('show_toast', {
+          detail: { type: 'success', message: 'Cập nhật khách hàng thành công!' }
+        }));
       } else {
         const newCustomer = { ...formData, id: `CUST_${Date.now()}` };
         await api.post('/customers', newCustomer);
         setCustomers([...customers, newCustomer]);
         await logAction(currentUser, 'CREATE', 'CUSTOMER', newCustomer.id, `Tạo khách hàng mới: ${newCustomer.name}`);
+        window.dispatchEvent(new CustomEvent('show_toast', {
+          detail: { type: 'success', message: 'Tạo khách hàng thành công!' }
+        }));
       }
       setShowModal(false);
-    } catch(e) { console.error(e); }
+    } catch(e) { 
+      console.error(e); 
+      window.dispatchEvent(new CustomEvent('show_toast', {
+        detail: { type: 'error', message: 'Đã xảy ra lỗi khi lưu!' }
+      }));
+    }
   };
 
   const handleDelete = async (id) => {
@@ -72,7 +86,15 @@ const CustomersList = () => {
         });
         setCustomers(customers.filter(c => c.id !== id));
         await logAction(currentUser, 'DELETE', 'CUSTOMER', id, `Xóa tạm khách hàng: ${custToDelete.name}`, true);
-      } catch(e) { console.error(e); }
+        window.dispatchEvent(new CustomEvent('show_toast', {
+          detail: { type: 'success', message: 'Đã xóa khách hàng vào thùng rác!' }
+        }));
+      } catch(e) { 
+        console.error(e); 
+        window.dispatchEvent(new CustomEvent('show_toast', {
+          detail: { type: 'error', message: 'Xóa thất bại!' }
+        }));
+      }
     }
   };
 
@@ -181,6 +203,7 @@ const CustomersList = () => {
             <tr>
               <th>Mã KH</th>
               <th>Tên Khách Hàng / Công ty</th>
+              <th>Dự án liên kết</th>
               <th>Phân loại</th>
               <th>Ngành nghề</th>
               <th>Người quản lý</th>
@@ -190,10 +213,12 @@ const CustomersList = () => {
           <tbody>
             {filteredCustomers.length > 0 ? filteredCustomers.map(c => {
               const ownerName = users.find(u => u.id === c.ownerId)?.name || 'Chưa rõ';
+              const projectName = projects.find(p => p.id === c.projectId)?.name || '-';
               return (
                 <tr key={c.id}>
                   <td>{c.code}</td>
                   <td className="fw-600 color-blue">{c.name}</td>
+                  <td>{projectName}</td>
                   <td>
                     <span className={`badge ${c.type === 'Khách hàng cá nhân' ? 'badge-info' : ''}`}>
                       {c.type}
@@ -253,6 +278,15 @@ const CustomersList = () => {
                 <select className="form-control" value={formData.ownerId} onChange={e => setFormData({...formData, ownerId: e.target.value})} disabled={currentUser.role === 'Sale'}>
                   {users.filter(u => u.role === 'Sale' || u.role === 'Manager').map(u => (
                     <option key={u.id} value={u.id}>{u.name} - {u.role}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Dự án liên kết</label>
+                <select className="form-control" value={formData.projectId || ''} onChange={e => setFormData({...formData, projectId: e.target.value})}>
+                  <option value="">-- Không thuộc dự án nào --</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
               </div>

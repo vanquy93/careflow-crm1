@@ -21,15 +21,17 @@ const DealsBoard = () => {
   const [customersData, setCustomersData] = useState([]);
   const [filteredDeals, setFilteredDeals] = useState([]);
   const [dealStages, setDealStages] = useState([]);
+  const [projects, setProjects] = useState([]);
 
   // Fetch Data from Server
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [dealsRes, custRes, stagesRes] = await Promise.all([
+        const [dealsRes, custRes, stagesRes, prjRes] = await Promise.all([
           api.get('/deals'),
           api.get('/customers'),
-          api.get('/deal_stages')
+          api.get('/deal_stages'),
+          api.get('/projects')
         ]);
         setDeals(dealsRes.data.filter(d => !d.isDeleted));
         let custData = custRes.data.filter(c => !c.isDeleted);
@@ -38,6 +40,7 @@ const DealsBoard = () => {
         }
         setCustomersData(custData);
         setDealStages(stagesRes.data.sort((a,b) => (a.order || 0) - (b.order || 0)));
+        setProjects(prjRes.data || []);
         
         // Check if URL has a Deal ID to auto-open
         const dealIdToOpen = searchParams.get('id');
@@ -146,6 +149,12 @@ const DealsBoard = () => {
         await api.post('/notifications', notif);
         window.dispatchEvent(new Event('new_notification'));
       }
+      
+      // Notify the user via toast
+      const newStage = dealStages.find(s => s.id === destination.droppableId)?.title || destination.droppableId;
+      window.dispatchEvent(new CustomEvent('show_toast', {
+        detail: { type: 'success', message: `Đã di chuyển "${draggedDeal.title}" sang "${newStage}"` }
+      }));
     } catch (err) {
       console.error("Lỗi khi ghi log hoặc gửi thông báo:", err);
       // Không revert UI ở đây vì API lưu DB đã thành công
@@ -172,6 +181,7 @@ const DealsBoard = () => {
         value: 0,
         stageId: dealStages[0]?.id || 'stage-1',
         agentId: currentUser.id,
+        projectId: '',
         notes: '',
         tags: [],
         createdAt: new Date().toISOString()
@@ -212,16 +222,24 @@ const DealsBoard = () => {
         await api.put(`/deals/${selectedDeal.id}`, selectedDeal);
         await logAction(currentUser, 'UPDATE', 'DEAL', selectedDeal.id, `Cập nhật thông tin thương vụ: ${selectedDeal.title}`, false);
         setDeals(deals.map(d => d.id === selectedDeal.id ? selectedDeal : d));
+        window.dispatchEvent(new CustomEvent('show_toast', {
+          detail: { type: 'success', message: 'Cập nhật thương vụ thành công!' }
+        }));
       } else {
         await api.post('/deals', selectedDeal);
         await logAction(currentUser, 'CREATE', 'DEAL', selectedDeal.id, `Tạo mới thương vụ: ${selectedDeal.title}`, false);
         setDeals([...deals, selectedDeal]);
+        window.dispatchEvent(new CustomEvent('show_toast', {
+          detail: { type: 'success', message: 'Tạo thương vụ thành công!' }
+        }));
       }
       setShowModal(false);
       setSelectedDeal(null);
     } catch (err) {
       console.error("Lỗi lưu Thương vụ:", err);
-      alert("Đã xảy ra lỗi khi lưu vào máy chủ!");
+      window.dispatchEvent(new CustomEvent('show_toast', {
+        detail: { type: 'error', message: 'Đã xảy ra lỗi khi lưu vào máy chủ!' }
+      }));
     }
   };
 
@@ -404,16 +422,24 @@ const DealsBoard = () => {
                 
                 {isManager && (
                   <div className="form-group" style={{flex: 1}}>
-                    <label>Người phụ trách</label>
-                    <select 
-                      value={selectedDeal.agentId} 
-                      onChange={e => setSelectedDeal({...selectedDeal, agentId: e.target.value})}
-                      className="form-control"
-                    >
-                      {users.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                    <label>Người phụ trách (Sale)</label>
+                    <select className="form-control" value={selectedDeal?.agentId || ''} onChange={e => setSelectedDeal({...selectedDeal, agentId: e.target.value})} disabled={currentUser.role === 'Sale'}>
+                      {users.filter(u => u.role === 'Sale' || u.role === 'Manager').map(u => (
+                        <option key={u.id} value={u.id}>{u.name}</option>
+                      ))}
                     </select>
                   </div>
                 )}
+              </div>
+
+              <div className="form-group">
+                <label>Thuộc Dự án</label>
+                <select className="form-control" value={selectedDeal?.projectId || ''} onChange={e => setSelectedDeal({...selectedDeal, projectId: e.target.value})}>
+                  <option value="">-- Không thuộc dự án nào --</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
               </div>
               
               <div className="form-group">

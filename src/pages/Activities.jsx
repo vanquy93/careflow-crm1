@@ -26,15 +26,26 @@ const initialMockActivities = [
 const Activities = () => {
   const [activities, setActivities] = useState([]);
   const [contactsData, setContactsData] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [deals, setDeals] = useState([]);
 
   useEffect(() => {
-    api.get('/activities').then(res => setActivities(res.data)).catch(console.error);
-    api.get('/contacts').then(res => setContactsData(res.data)).catch(console.error);
+    Promise.all([
+      api.get('/activities'),
+      api.get('/contacts'),
+      api.get('/projects'),
+      api.get('/deals')
+    ]).then(([resAct, resCont, resProj, resDeals]) => {
+      setActivities(resAct.data);
+      setContactsData(resCont.data);
+      setProjects(resProj.data || []);
+      setDeals(resDeals.data.filter(d => !d.isDeleted) || []);
+    }).catch(console.error);
   }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({ type: 'Call', title: '', date: '', contact: '', status: 'Sắp tới' });
+  const [formData, setFormData] = useState({ type: 'Call', title: '', date: '', contact: '', status: 'Sắp tới', projectId: '', dealId: '' });
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('calendar'); // 'list' or 'calendar'
 
@@ -46,7 +57,7 @@ const Activities = () => {
       setFormData(act);
     } else {
       setEditingId(null);
-      setFormData({ type: 'Call', title: '', date: '', contact: '', status: 'Sắp tới' });
+      setFormData({ type: 'Call', title: '', date: '', contact: '', status: 'Sắp tới', projectId: '', dealId: '' });
     }
     setShowModal(true);
   };
@@ -165,6 +176,7 @@ const Activities = () => {
               <tr>
                 <th>Loại</th>
                 <th>Chủ đề</th>
+                <th>Dự án/Thương vụ</th>
                 <th>Thời gian</th>
                 <th>Liên hệ với</th>
                 <th>Trạng thái</th>
@@ -181,6 +193,10 @@ const Activities = () => {
                     </div>
                   </td>
                   <td className="fw-600 color-blue">{act.title}</td>
+                  <td>
+                    {act.projectId && <div style={{fontSize: '12px', color: '#6554c0'}}>Dự án: {projects.find(p=>p.id === act.projectId)?.name}</div>}
+                    {act.dealId && <div style={{fontSize: '12px', color: '#ff991f'}}>Thương vụ: {deals.find(d=>d.id === act.dealId)?.title}</div>}
+                  </td>
                   <td>{act.date}</td>
                   <td>{act.contact}</td>
                   <td><span className={`badge ${act.status === 'Đã hoàn thành' ? 'badge-success' : 'badge-warning'}`}>{act.status}</span></td>
@@ -216,7 +232,7 @@ const Activities = () => {
             onSelectEvent={(event) => handleOpenModal(event)}
             onSelectSlot={(slotInfo) => {
               setEditingId(null);
-              setFormData({ type: 'Call', title: '', date: format(slotInfo.start, "yyyy-MM-dd HH:mm"), contact: '', status: 'Sắp tới' });
+              setFormData({ type: 'Call', title: '', date: format(slotInfo.start, "yyyy-MM-dd HH:mm"), contact: '', status: 'Sắp tới', projectId: '', dealId: '' });
               setShowModal(true);
             }}
             selectable
@@ -246,6 +262,22 @@ const Activities = () => {
                     <option value="Zalo OA">Zalo OA</option>
                   </select>
                 </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Liên kết Dự án</label>
+                  <select className="form-control" value={formData.projectId || ''} onChange={e => setFormData({...formData, projectId: e.target.value})}>
+                    <option value="">-- Không chọn --</option>
+                    {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Liên kết Thương vụ</label>
+                  <select className="form-control" value={formData.dealId || ''} onChange={e => setFormData({...formData, dealId: e.target.value})}>
+                    <option value="">-- Không chọn --</option>
+                    {deals.map(d => <option key={d.id} value={d.id}>{d.title}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>Thời gian</label>
                   <input type="text" className="form-control" placeholder="Ví dụ: 2023-11-20 14:00" required value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />

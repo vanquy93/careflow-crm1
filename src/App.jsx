@@ -5,6 +5,7 @@ import { CRMProvider } from './context/CRMContext';
 import Header from './components/Header';
 import GlobalSearch from './components/GlobalSearch';
 import AIAssistant from './components/AIAssistant';
+import GlobalToast from './components/GlobalToast';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -96,6 +97,7 @@ function App() {
           <Router>
             <GlobalSearch />
             <AIAssistant />
+            <GlobalToast />
             <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

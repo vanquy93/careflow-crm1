@@ -20,6 +20,7 @@ const Dashboard = () => {
   const { isManager, currentUser, users } = useAuth();
   const [deals, setDeals] = useState([]);
   const [dealStages, setDealStages] = useState([]);
+  const [projects, setProjects] = useState([]);
   const wonStageId = dealStages.length > 0 ? dealStages[dealStages.length - 1].id : 'stage-6';
   
   // States for unified dashboard
@@ -28,6 +29,7 @@ const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState('ALL');
   const [selectedQuarter, setSelectedQuarter] = useState('ALL');
   const [selectedAgent, setSelectedAgent] = useState('ALL');
+  const [selectedProject, setSelectedProject] = useState('ALL');
   
   const [kpiSearch, setKpiSearch] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'kpi.current', direction: 'desc' });
@@ -38,9 +40,10 @@ const Dashboard = () => {
   const [isEditingTarget, setIsEditingTarget] = useState(false);
 
   useEffect(() => {
-    Promise.all([api.get('/deals'), api.get('/deal_stages')])
-      .then(([dealsRes, stagesRes]) => {
+    Promise.all([api.get('/deals'), api.get('/deal_stages'), api.get('/projects')])
+      .then(([dealsRes, stagesRes, projRes]) => {
         setDeals(dealsRes.data.filter(d => !d.isDeleted));
+        setProjects(projRes.data || []);
         if (stagesRes.data.length > 0) {
           setDealStages(stagesRes.data.sort((a,b) => (a.order||0) - (b.order||0)));
         } else {
@@ -71,11 +74,12 @@ const Dashboard = () => {
 
   // 1. Data logic for Reports (Revenue charts)
   const closedDeals = useMemo(() => {
-    let d = deals.filter(d => d.stageId === 'stage-6');
+    let d = deals.filter(d => d.stageId === 'stage-6'); // Mặc định là stage-6 hoặc wonStageId
     if (!isManager) d = d.filter(d => d.agentId === currentUser.id);
     if (selectedAgent !== 'ALL') d = d.filter(d => d.agentId === selectedAgent);
+    if (selectedProject !== 'ALL') d = d.filter(d => d.projectId === selectedProject);
     return d;
-  }, [deals, isManager, currentUser, selectedAgent, wonStageId]);
+  }, [deals, isManager, currentUser, selectedAgent, selectedProject, wonStageId]);
 
   const chartData = useMemo(() => {
     let raw = {};
@@ -157,16 +161,17 @@ const Dashboard = () => {
     }
   };
 
-  // 2. Data logic for KPI and Funnel (Filtered by Time)
+  // 2. Data logic for KPI and Funnel (Filtered by Time and Project)
   const timeFilteredDeals = useMemo(() => {
     return deals.filter(d => {
       const date = new Date(d.createdAt || Date.now());
       if (date.getFullYear() !== selectedYear) return false;
       if (selectedMonth !== 'ALL' && date.getMonth() !== Number(selectedMonth)) return false;
       if (selectedQuarter !== 'ALL' && Math.floor(date.getMonth() / 3) !== Number(selectedQuarter)) return false;
+      if (selectedProject !== 'ALL' && d.projectId !== selectedProject) return false;
       return true;
     });
-  }, [deals, selectedYear, selectedMonth, selectedQuarter]);
+  }, [deals, selectedYear, selectedMonth, selectedQuarter, selectedProject]);
 
   // Overall KPI total revenue (for the selected time period)
   const totalRevenue = timeFilteredDeals.filter(d => d.stageId === wonStageId).reduce((s, d) => s + (Number(d.value) || 0), 0);
@@ -302,6 +307,11 @@ const Dashboard = () => {
               {users.filter(u => u.role === 'Sale').map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
           )}
+
+          <select className="form-control" style={{ width: 150, padding: '8px' }} value={selectedProject} onChange={e => setSelectedProject(e.target.value)}>
+            <option value="ALL">Tất cả Dự án</option>
+            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
 
           <button className="btn-export" style={{ background: 'var(--bg-white)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={handleExportCSV}>
             <Download size={16} /> Xuất CSV
