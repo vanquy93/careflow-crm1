@@ -152,7 +152,10 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/:collection', authenticateToken, async (req, res) => {
+const VALID_COLLECTIONS = ['activities', 'contacts', 'auditLogs', 'campaigns', 'emails', 'customers', 'deals', 'deal_stages', 'notifications', 'projects', 'users'];
+const colRegex = `:collection(${VALID_COLLECTIONS.join('|')})`;
+
+app.get(`/${colRegex}`, authenticateToken, async (req, res) => {
   try {
     const docs = await getDocuments(req.params.collection, req.query);
     res.json(docs);
@@ -161,7 +164,7 @@ app.get('/:collection', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/:collection', authenticateToken, async (req, res) => {
+app.post(`/${colRegex}`, authenticateToken, async (req, res) => {
   try {
     const data = req.body;
     const id = data.id || `gen_${Date.now()}_${Math.floor(Math.random()*1000)}`;
@@ -179,7 +182,7 @@ app.post('/:collection', authenticateToken, async (req, res) => {
   }
 });
 
-app.put('/:collection/:id', authenticateToken, async (req, res) => {
+app.put(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
   try {
     const data = req.body;
     data.id = req.params.id;
@@ -193,7 +196,7 @@ app.put('/:collection/:id', authenticateToken, async (req, res) => {
   }
 });
 
-app.patch('/:collection/:id', authenticateToken, async (req, res) => {
+app.patch(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
   try {
     db.get(`SELECT data FROM documents WHERE id = ? AND collection = ?`, [req.params.id, req.params.collection], async (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
@@ -212,7 +215,7 @@ app.patch('/:collection/:id', authenticateToken, async (req, res) => {
   }
 });
 
-app.delete('/:collection/:id', authenticateToken, async (req, res) => {
+app.delete(`/${colRegex}/:id`, authenticateToken, async (req, res) => {
   try {
     await deleteDocument(req.params.collection, req.params.id);
     res.json({});
