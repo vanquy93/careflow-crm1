@@ -88,6 +88,17 @@ const Campaigns = () => {
             contact: c.name,
             status: 'Đã gửi thành công'
           });
+        } else if (camp.channel === 'SMS') {
+          return api.post('/activities', {
+            id: `SMS_${Date.now()}_${index}`,
+            type: 'SMS',
+            title: `[Chiến dịch SMS] Gửi tới ${c.phone || 'Không có SĐT'} - ${camp.name}`,
+            date: new Date().toLocaleString('vi-VN'),
+            contact: c.name,
+            phone: c.phone || '',
+            message: camp.message,
+            status: c.phone ? 'Đã gửi thành công' : 'Thất bại - Không có SĐT'
+          });
         } else {
           return api.post('/emails', {
             id: `EMAIL_${Date.now()}_${index}`,
@@ -160,6 +171,7 @@ const Campaigns = () => {
               <select className="form-control" value={campChannel} onChange={e => setCampChannel(e.target.value)} style={{ padding: '10px', fontSize: '15px' }}>
                 <option value="Email">📧 Gửi qua Email</option>
                 <option value="Zalo OA">💬 Gửi qua Zalo OA</option>
+                <option value="SMS">📱 Gửi SMS (Tin nhắn điện thoại)</option>
               </select>
             </div>
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
@@ -177,8 +189,8 @@ const Campaigns = () => {
               <div key={camp.id} style={{ padding: '1.25rem', background: '#f4f5f7', borderLeft: `4px solid ${camp.channel === 'Zalo OA' ? '#0068ff' : '#0052cc'}`, borderRadius: '0 8px 8px 0', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                 <div style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '15px', color: '#172b4d' }}>{camp.name}</span>
-                  <span style={{ fontSize: '12px', padding: '4px 10px', background: camp.channel === 'Zalo OA' ? '#e6f0ff' : '#e5e8ea', color: camp.channel === 'Zalo OA' ? '#0068ff' : '#42526e', borderRadius: '20px', fontWeight: 600 }}>
-                    {camp.channel === 'Zalo OA' ? '💬' : '📧'} {camp.channel || 'Email'}
+                <span style={{ fontSize: '12px', padding: '4px 10px', background: camp.channel === 'Zalo OA' ? '#e6f0ff' : camp.channel === 'SMS' ? '#fff3e0' : '#e5e8ea', color: camp.channel === 'Zalo OA' ? '#0068ff' : camp.channel === 'SMS' ? '#e65100' : '#42526e', borderRadius: '20px', fontWeight: 600 }}>
+                    {camp.channel === 'Zalo OA' ? '💬' : camp.channel === 'SMS' ? '📱' : '📧'} {camp.channel || 'Email'}
                   </span>
                 </div>
                 <div style={{ fontSize: '14px', color: '#00875a', fontWeight: 600 }}>Đã tiếp cận: {camp.sentCount} khách hàng</div>

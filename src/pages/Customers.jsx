@@ -425,13 +425,13 @@ const DealsBoard = () => {
               </div>
               
               <div style={{ marginTop: '24px', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
-                <h4 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}><Activity size={18}/> Lịch sử Tương tác</h4>
-                <div style={{ paddingLeft: '16px', borderLeft: '2px solid var(--border-color)', position: 'relative' }}>
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}><Activity size={18}/> Lịch sử Tương tác <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 4 }}>({dealLogs.length} hoạt động)</span></h4>
+                <div style={{ maxHeight: '200px', overflowY: 'auto', paddingLeft: '16px', paddingRight: '4px', borderLeft: '2px solid var(--border-color)', position: 'relative' }}>
                   {dealLogs.length === 0 ? (
                     <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Chưa có hoạt động nào được ghi nhận.</p>
                   ) : (
                     dealLogs.map((log) => (
-                      <div key={log.id} style={{ position: 'relative', marginBottom: '16px' }}>
+                      <div key={log.id} style={{ position: 'relative', marginBottom: '14px' }}>
                         <div style={{
                           position: 'absolute', left: '-21px', top: '2px', width: '10px', height: '10px',
                           backgroundColor: log.action === 'CREATE' ? '#36b37e' : (log.action === 'DELETE' ? '#ff5630' : '#2563eb'),

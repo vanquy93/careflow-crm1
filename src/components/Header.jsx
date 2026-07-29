@@ -108,8 +108,7 @@ const Header = () => {
     <header className="base-header">
       <div className="header-left">
         <div className="app-icon">
-          <Grid size={18} />
-          <span style={{ fontWeight: 600, marginLeft: '6px' }}>QUYPRO CRM</span>
+          <span style={{ fontWeight: 800, fontSize: '16px', letterSpacing: '0.5px', color: '#ffffff' }}>NEXTHOME CRM</span>
         </div>
         <div className="search-box" onClick={() => window.dispatchEvent(new Event('open_global_search'))} style={{ cursor: 'text', position: 'relative' }}>
           <input type="text" placeholder="Tìm kiếm (Ctrl + K)" readOnly style={{ cursor: 'text' }} />
@@ -121,14 +120,14 @@ const Header = () => {
         <NavLink to="/deals" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Briefcase size={16}/> Thương vụ</NavLink>
         <NavLink to="/contacts" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Users size={16}/> Liên hệ</NavLink>
         <NavLink to="/customers" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Target size={16}/> Khách hàng</NavLink>
+        <NavLink to="/projects" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Grid size={16}/> Dự án</NavLink>
         <NavLink to="/activities" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Activity size={16}/> Hoạt động</NavLink>
-        <NavLink to="/inbox" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Mail size={16}/> Hộp thư</NavLink>
         <NavLink to="/campaigns" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Menu size={16}/> Chiến dịch</NavLink>
         {isManager && (
-          <NavLink to="/revenue" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Target size={16}/> Ghi nhận Doanh số</NavLink>
+          <NavLink to="/revenue" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Target size={16}/> Ghi nhận DS</NavLink>
         )}
         {isManager && (
-          <NavLink to="/dashboard" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><BarChart2 size={16}/> Báo cáo</NavLink>
+          <NavLink to="/dashboard" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><BarChart2 size={16}/> Báo cáo & Dashboard</NavLink>
         )}
         {isManager && (
           <NavLink to="/settings" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Settings size={16}/> Nhân sự</NavLink>
@@ -142,9 +141,6 @@ const Header = () => {
       </nav>
 
       <div className="header-right">
-        <button className="icon-btn" title="Thêm mới"><PlusCircle size={18} /></button>
-        {isManager && <button className="icon-btn" title="Cài đặt"><Settings size={18} /></button>}
-        
         <div style={{ position: 'relative' }} ref={themeRef}>
           <button className="icon-btn" title="Đổi màu giao diện" onClick={() => setShowTheme(!showTheme)}><Palette size={18} /></button>
           {showTheme && (

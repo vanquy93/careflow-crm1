@@ -20,6 +20,13 @@ const Settings = () => {
   });
   const [zaloStatus, setZaloStatus] = useState(null);
 
+  const [smsConfig, setSmsConfig] = useState(() => {
+    const saved = localStorage.getItem('smsConfig');
+    return saved ? JSON.parse(saved) : { provider: 'esms', apiKey: '', secretKey: '', brandname: '', smsType: '4' };
+  });
+  const [smsStatus, setSmsStatus] = useState(null);
+  const [smsTestPhone, setSmsTestPhone] = useState('');
+
   const handleColorChange = (e) => {
     const color = e.target.value;
     setPrimaryColor(color);
@@ -37,14 +44,10 @@ const Settings = () => {
   const handleTestZalo = async () => {
     setZaloStatus('loading');
     try {
-      // Gọi thử API Zalo thật để kiểm tra Access Token
       const res = await fetch('https://openapi.zalo.me/v2.0/oa/getoa', {
-        headers: {
-          'access_token': zaloConfig.accessToken
-        }
+        headers: { 'access_token': zaloConfig.accessToken }
       });
       const data = await res.json();
-      
       if (data.error) {
         setZaloStatus({ success: false, message: `Lỗi từ Zalo: ${data.message} (Code: ${data.error})` });
       } else {
@@ -53,6 +56,35 @@ const Settings = () => {
       localStorage.setItem('zaloConfig', JSON.stringify(zaloConfig));
     } catch (error) {
       setZaloStatus({ success: false, message: "Không thể kết nối đến máy chủ Zalo. Vui lòng kiểm tra lại mạng hoặc mã Access Token!" });
+    }
+  };
+
+  const handleSaveSMS = () => {
+    localStorage.setItem('smsConfig', JSON.stringify(smsConfig));
+    setSmsStatus({ success: true, message: 'Đã lưu cấu hình SMS thành công!' });
+    setTimeout(() => setSmsStatus(null), 3000);
+  };
+
+  const handleTestSMS = async () => {
+    if (!smsTestPhone) { alert('Vui lòng nhập số điện thoại test!'); return; }
+    if (!smsConfig.apiKey) { alert('Vui lòng nhập API Key trước!'); return; }
+    setSmsStatus('loading');
+    try {
+      // Test call to ESMS API
+      const res = await fetch('https://rest.esms.vn/MainService.svc/json/GetBalance_V4_post_json/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ApiKey: smsConfig.apiKey, SecretKey: smsConfig.secretKey })
+      });
+      const data = await res.json();
+      if (data.CodeResult === '100') {
+        setSmsStatus({ success: true, message: `Kết nối ESMS thành công! Số dư tài khoản: ${data.Balance} credit` });
+        localStorage.setItem('smsConfig', JSON.stringify(smsConfig));
+      } else {
+        setSmsStatus({ success: false, message: `Lỗi: ${data.ErrorMessage || 'API key không hợp lệ'}` });
+      }
+    } catch {
+      setSmsStatus({ success: false, message: 'Không thể kết nối. Kiểm tra lại API Key!' });
     }
   };
 
@@ -250,6 +282,62 @@ const Settings = () => {
             {zaloStatus && zaloStatus !== 'loading' && (
               <div style={{ marginTop: '16px', padding: '12px', borderRadius: '4px', background: zaloStatus.success ? '#e6ffed' : '#ffebe9', border: `1px solid ${zaloStatus.success ? '#2ea043' : '#ff8182'}`, color: zaloStatus.success ? '#05501e' : '#cf222e', fontSize: '13.5px' }}>
                 {zaloStatus.message}
+              </div>
+            )}
+          </div>
+
+          {/* SMS Integration */}
+          <div style={{ background: '#fff', border: '1px solid #dfe1e6', borderRadius: 12, padding: 24, marginTop: 20 }}>
+            <h3 style={{ margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 10, fontSize: '1.1rem' }}>
+              <span style={{ fontSize: 24 }}>📱</span> Tích Hợp Gửi SMS (ESMS.vn)
+            </h3>
+
+            <div style={{ background: '#fffbeb', border: '1px solid #f59e0b', borderRadius: 8, padding: '12px 16px', marginBottom: 20, fontSize: 13 }}>
+              <strong>⚠️ Hướng dẫn:</strong> Đăng ký tại <a href="https://esms.vn" target="_blank" rel="noreferrer" style={{ color: '#0052cc' }}>esms.vn</a> → Lấy API Key + Secret Key → Đăng ký Brandname → Dán vào đây. Chi phí ~350đ/tin.
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div className="form-group">
+                <label style={{ fontWeight: 600 }}>API Key *</label>
+                <input type="text" className="form-control" placeholder="Nhập ESMS API Key..." value={smsConfig.apiKey} onChange={e => setSmsConfig({...smsConfig, apiKey: e.target.value})} style={{ padding: 10 }}/>
+              </div>
+              <div className="form-group">
+                <label style={{ fontWeight: 600 }}>Secret Key *</label>
+                <input type="password" className="form-control" placeholder="Nhập Secret Key..." value={smsConfig.secretKey} onChange={e => setSmsConfig({...smsConfig, secretKey: e.target.value})} style={{ padding: 10 }}/>
+              </div>
+              <div className="form-group">
+                <label style={{ fontWeight: 600 }}>Brandname (Tên hiển thị)</label>
+                <input type="text" className="form-control" placeholder="VD: NEXTHOME" value={smsConfig.brandname} onChange={e => setSmsConfig({...smsConfig, brandname: e.target.value})} style={{ padding: 10 }}/>
+              </div>
+              <div className="form-group">
+                <label style={{ fontWeight: 600 }}>Loại SMS</label>
+                <select className="form-control" value={smsConfig.smsType} onChange={e => setSmsConfig({...smsConfig, smsType: e.target.value})} style={{ padding: 10 }}>
+                  <option value="4">Brandname quảng cáo (Type 4)</option>
+                  <option value="2">Brandname OTP (Type 2)</option>
+                  <option value="8">Fix2phone (Type 8)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 16 }}>
+              <label style={{ fontWeight: 600 }}>Số điện thoại test</label>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input type="tel" className="form-control" placeholder="0984214746" value={smsTestPhone} onChange={e => setSmsTestPhone(e.target.value)} style={{ padding: 10 }}/>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button onClick={handleSaveSMS} style={{ background: '#36b37e', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
+                💾 Lưu cấu hình
+              </button>
+              <button onClick={handleTestSMS} disabled={smsStatus === 'loading'} style={{ background: '#0052cc', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
+                {smsStatus === 'loading' ? 'Đang kiểm tra...' : '📱 Kiểm tra kết nối'}
+              </button>
+            </div>
+
+            {smsStatus && smsStatus !== 'loading' && (
+              <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 8, background: smsStatus.success ? '#e6ffed' : '#ffebe9', border: `1px solid ${smsStatus.success ? '#2ea043' : '#ff8182'}`, color: smsStatus.success ? '#05501e' : '#cf222e', fontSize: 13.5 }}>
+                {smsStatus.message}
               </div>
             )}
           </div>

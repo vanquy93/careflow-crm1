@@ -13,10 +13,10 @@ import Dashboard from './pages/Dashboard';
 import Contacts from './pages/Contacts';
 import CustomersList from './pages/CustomersList';
 import Activities from './pages/Activities';
-import Inbox from './pages/Inbox';
 import Settings from './pages/Settings';
 import Campaigns from './pages/Campaigns';
 import Revenue from './pages/Revenue';
+import Projects from './pages/Projects';
 import RecycleBin from './pages/RecycleBin';
 import AuditLogs from './pages/AuditLogs';
 import ChangePassword from './pages/ChangePassword';
@@ -107,10 +107,10 @@ function App() {
             <Route path="/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
             <Route path="/customers" element={<ProtectedRoute><CustomersList /></ProtectedRoute>} />
             <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
-            <Route path="/inbox" element={<ProtectedRoute><Inbox /></ProtectedRoute>} />
             <Route path="/campaigns" element={<ProtectedRoute><Campaigns /></ProtectedRoute>} />
             
             <Route path="/revenue" element={<ProtectedRoute requireManager={true}><Revenue /></ProtectedRoute>} />
+            <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute requireManager={true}><Dashboard /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute requireManager={true}><Settings /></ProtectedRoute>} />
             
