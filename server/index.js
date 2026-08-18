@@ -114,10 +114,16 @@ const authenticateToken = (req, res, next) => {
 };
 
 app.post('/login', async (req, res) => {
-  const { email, password } = req.body; // 'email' field here actually receives the input from the form, which could be email, phone, or id
+  const { email, password } = req.body;
   try {
     const users = await getDocuments('users');
-    const user = users.find(u => (u.email === email || u.id === email || u.phone === email) && !u.isDeleted);
+    const emailLower = email ? email.toLowerCase() : '';
+    const user = users.find(u => 
+      ((u.email && u.email.toLowerCase() === emailLower) || 
+       (u.id && u.id.toLowerCase() === emailLower) || 
+       (u.phone === email)) 
+      && !u.isDeleted
+    );
     
     if (!user) {
       return res.status(401).json({ error: 'Tài khoản hoặc mật khẩu không đúng' });
