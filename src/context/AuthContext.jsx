@@ -29,13 +29,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await api.post('/login', { email, password });
-      const { token, user } = res.data;
+      const response = await api.get('/users');
+      const allUsers = response.data;
+      const user = allUsers.find(u => 
+        (u.email.toLowerCase() === email.toLowerCase() || u.id.toLowerCase() === email.toLowerCase()) 
+        && u.password === password
+      );
       
-      setCurrentUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', token);
-      return true;
+      if (user) {
+        setCurrentUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', 'fake-jwt-token-for-json-server');
+        return true;
+      }
+      return false;
     } catch (err) {
       console.error('Login failed:', err);
       return false;
@@ -43,29 +50,33 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    const exists = users.find(u => u.email === userData.email);
-    if (exists) return false;
-
-    const newUser = {
-      id: `EMP_${Date.now()}`,
-      name: userData.name,
-      email: userData.email,
-      phone: userData.phone || '',
-      password: userData.password || '12345678',
-      mustChangePassword: true,
-      role: userData.role,
-      permissions: userData.permissions || [],
-      avatar: `https://i.pravatar.cc/150?u=${userData.email}`,
-      kpi: { target: userData.kpiTarget || 1000000000, achieved: 0 }
-    };
-
     try {
+      const response = await api.get('/users');
+      const allUsers = response.data;
+      const exists = allUsers.find(u => u.email === userData.email);
+      if (exists) return false;
+
+      const newUser = {
+        id: `EMP_${Date.now()}`,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone || '',
+        password: userData.password || '12345678',
+        mustChangePassword: true,
+        role: userData.role,
+        permissions: userData.permissions || [],
+        avatar: `https://i.pravatar.cc/150?u=${userData.email}`,
+        kpi: { target: userData.kpiTarget || 1000000000, achieved: 0 }
+      };
+
       await api.post('/users', newUser);
-      setUsers([...users, newUser]);
-      const res = await api.post('/login', { email: userData.email, password: userData.password || '12345678' });
-      setCurrentUser(res.data.user);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      localStorage.setItem('token', res.data.token);
+      if (users && users.length > 0) {
+         setUsers([...users, newUser]);
+      }
+      
+      setCurrentUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      localStorage.setItem('token', 'fake-jwt-token-for-json-server');
       return true;
     } catch (e) {
       console.error(e);

@@ -51,7 +51,7 @@ const AIAssistant = () => {
       
       const lastStageId = dealStages.length > 0 ? dealStages[dealStages.length - 1].id : 'stage-6';
       
-      // Dynamic Search by Stage Name
+      // Dynamic Search by Stage Name or Deal Name
       const matchedStage = dealStages.find(s => inputValue.toLowerCase().includes(s.title.toLowerCase()));
 
       if (matchedStage) {
@@ -64,6 +64,14 @@ const AIAssistant = () => {
       } else if (inputValue.toLowerCase().includes('nóng') || inputValue.toLowerCase().includes('hot')) {
         const hotDeals = deals.filter(d => !d.isDeleted && d.value > 50000000 && d.stageId !== lastStageId);
         reply = `Sếp đang có ${hotDeals.length} thương vụ NÓNG: ${hotDeals.map(d => d.company).join(', ')}. Hãy ưu tiên chốt nhé!`;
+      } else {
+        // Fallback: Search deals by name/company
+        const searchedDeals = deals.filter(d => !d.isDeleted && (d.title.toLowerCase().includes(inputValue.toLowerCase()) || d.company.toLowerCase().includes(inputValue.toLowerCase())));
+        if (searchedDeals.length > 0) {
+           const top = searchedDeals.slice(0, 3);
+           const stagesDict = dealStages.reduce((acc, s) => ({...acc, [s.id]: s.title}), {});
+           reply = `Tìm thấy ${searchedDeals.length} kết quả: ${top.map(d => `"${d.title}" (Giai đoạn: ${stagesDict[d.stageId] || 'Chưa rõ'})`).join(' | ')}${searchedDeals.length > 3 ? '...' : ''}`;
+        }
       }
       
       setMessages([...newMsgs, { sender: 'ai', text: reply }]);

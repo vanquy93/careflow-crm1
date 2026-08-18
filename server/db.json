@@ -70,7 +70,7 @@
       "company": "Techcombank",
       "value": 150000000,
       "agentId": "EMP002",
-      "stageId": "stage-6",
+      "stageId": "stage-8",
       "tags": [
         "Ngân hàng",
         "VIP"
@@ -83,7 +83,7 @@
       "company": "Công ty TNHH Techcombank",
       "value": 85000000,
       "agentId": "EMP001",
-      "stageId": "stage-6",
+      "stageId": "stage-5",
       "tags": [
         "Bán lẻ"
       ],
@@ -94,7 +94,7 @@
       "title": "tiền số",
       "company": "Công ty TNHH Techcombank",
       "value": 100000000,
-      "stageId": "stage-1",
+      "stageId": "stage-2",
       "agentId": "EMP_1782836856466",
       "notes": "thay đổi",
       "tags": [],
@@ -430,6 +430,74 @@
       "entityId": "gp52SHKfqwk",
       "details": "Di chuyển \"tiền số\" từ stage-2 sang stage-1",
       "timestamp": "2026-07-02T13:55:52.900Z"
+    },
+    {
+      "id": "ZK5qRkS5deQ",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "gp52SHKfqwk",
+      "details": "Di chuyển \"tiền số\" từ stage-1 sang stage-2",
+      "timestamp": "2026-08-18T15:53:10.940Z"
+    },
+    {
+      "id": "L36oBzaUlSo",
+      "user": "Quản trị Hệ thống",
+      "role": "Admin",
+      "action": "UPDATE",
+      "entity": "DEAL",
+      "entityId": "DEAL001",
+      "details": "Di chuyển \"HĐ Phần mềm ERP\" từ stage-6 sang stage-8",
+      "timestamp": "2026-08-18T15:53:38.025Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "w56IWhu4r9Q",
+      "name": "vinhome",
+      "description": "111",
+      "managerId": "admin",
+      "memberIds": [
+        "admin",
+        "EMP001"
+      ],
+      "createdBy": "admin",
+      "createdAt": "2026-08-18T15:53:52.446Z"
+    }
+  ],
+  "deal_stages": [
+    {
+      "id": "stage-1",
+      "title": "Tiếp cận (FB, GG,...)"
+    },
+    {
+      "id": "stage-2",
+      "title": "Thu lead"
+    },
+    {
+      "id": "stage-3",
+      "title": "Phân loại KH"
+    },
+    {
+      "id": "stage-4",
+      "title": "Telesale L1"
+    },
+    {
+      "id": "stage-5",
+      "title": "Tư vấn trực tiếp"
+    },
+    {
+      "id": "stage-6",
+      "title": "Xem dự án"
+    },
+    {
+      "id": "stage-7",
+      "title": "Nuôi dưỡng"
+    },
+    {
+      "id": "stage-8",
+      "title": "Chốt cọc/Booking"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

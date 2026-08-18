@@ -118,26 +118,35 @@ const Header = () => {
 
       <nav className="header-nav">
         <NavLink to="/deals" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Briefcase size={16}/> Thương vụ</NavLink>
-        <NavLink to="/contacts" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Users size={16}/> Liên hệ</NavLink>
-        <NavLink to="/customers" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Target size={16}/> Khách hàng</NavLink>
         <NavLink to="/projects" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Grid size={16}/> Dự án</NavLink>
-        <NavLink to="/activities" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Activity size={16}/> Hoạt động</NavLink>
-        <NavLink to="/campaigns" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Menu size={16}/> Chiến dịch</NavLink>
+        <NavLink to="/customers" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Target size={16}/> Khách hàng</NavLink>
+        <NavLink to="/contacts" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Users size={16}/> Liên hệ</NavLink>
         {isManager && (
-          <NavLink to="/revenue" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Target size={16}/> Ghi nhận DS</NavLink>
+          <NavLink to="/dashboard" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><BarChart2 size={16}/> Báo cáo</NavLink>
         )}
-        {isManager && (
-          <NavLink to="/dashboard" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><BarChart2 size={16}/> Báo cáo & Dashboard</NavLink>
-        )}
-        {isManager && (
-          <NavLink to="/settings" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Settings size={16}/> Nhân sự</NavLink>
-        )}
-        {isAdmin && (
-          <NavLink to="/recycle-bin" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Trash size={16}/> Thùng rác</NavLink>
-        )}
-        {isAdmin && (
-          <NavLink to="/audit-logs" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}><Shield size={16}/> Logs</NavLink>
-        )}
+        
+        {/* Dropdown Tiện Ích */}
+        <div className="nav-item-dropdown" style={{ position: 'relative' }}>
+          <div className="nav-item" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Settings size={16}/> Tiện ích
+          </div>
+          <div className="dropdown-menu-nav">
+            <NavLink to="/activities" className={({isActive}) => isActive ? "dropdown-item active" : "dropdown-item"}><Activity size={16}/> Hoạt động</NavLink>
+            <NavLink to="/campaigns" className={({isActive}) => isActive ? "dropdown-item active" : "dropdown-item"}><Menu size={16}/> Chiến dịch</NavLink>
+            {isManager && (
+              <NavLink to="/revenue" className={({isActive}) => isActive ? "dropdown-item active" : "dropdown-item"}><Target size={16}/> Ghi nhận DS</NavLink>
+            )}
+            {isManager && (
+              <NavLink to="/settings" className={({isActive}) => isActive ? "dropdown-item active" : "dropdown-item"}><Users size={16}/> Nhân sự</NavLink>
+            )}
+            {isAdmin && (
+              <NavLink to="/recycle-bin" className={({isActive}) => isActive ? "dropdown-item active" : "dropdown-item"}><Trash size={16}/> Thùng rác</NavLink>
+            )}
+            {isAdmin && (
+              <NavLink to="/audit-logs" className={({isActive}) => isActive ? "dropdown-item active" : "dropdown-item"}><Shield size={16}/> Logs hệ thống</NavLink>
+            )}
+          </div>
+        </div>
       </nav>
 
       <div className="header-right">
